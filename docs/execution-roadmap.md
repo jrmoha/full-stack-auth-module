@@ -20,7 +20,7 @@ Estimates are wall-clock minutes for one governed loop. Tasks marked "no reviewe
 | # | Task | Status | Depends on | Runs via | Gate | Notes |
 |---|---|---|---|---|---|---|
 | 0.1 | AI workflow | ✅ | none | main session | — | docs templates, CLAUDE.md, subagents, MCP config |
-| 0.2 | Workspace scaffold and tooling | ⬜ | 0.1 | researcher → main session | — | Next 16, Nest, Tailwind v4 setup verified via context7 |
+| 0.2 | Workspace scaffold and tooling | ✅ | 0.1 | researcher → main session | — | Next 16, Nest, Tailwind v4 setup verified via context7 |
 | 0.3 | Local Mongo and API config | ⬜ | 0.2 | main session | env | Full §7 API env schema in one task |
 | 0.4 | Web config: env, rewrite, headers | ⬜ | 0.2 | researcher → main session | env | Verify rewrite passes Set-Cookie and client IP. No reviewer (L) |
 | 0.5 | Test harness | ⬜ | 0.3 | researcher → main session | — | SWC transform for decorator metadata |

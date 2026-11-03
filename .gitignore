@@ -15,3 +15,8 @@ dist/
 coverage/
 playwright-report/
 test-results/
+
+# generated / local
+next-env.d.ts
+*.tsbuildinfo
+.DS_Store
