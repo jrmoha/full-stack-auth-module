@@ -1,2 +1,7 @@
 packages:
   - apps/*
+
+# Dependency build scripts are reviewed explicitly (pnpm 10 blocks them by default).
+allowBuilds:
+  # The postinstall is a fallback; the optional platform binary already works (verified in 0.5).
+  '@swc/core': false

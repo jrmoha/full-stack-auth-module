@@ -12,7 +12,7 @@
     "typecheck": "pnpm -r typecheck",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
-    "test": "echo 'test: placeholder until task 0.5 (Vitest)' && exit 0",
+    "test": "pnpm -r test",
     "e2e": "echo 'e2e: placeholder until task 3.2 (Playwright)' && exit 0"
   },
   "devDependencies": {

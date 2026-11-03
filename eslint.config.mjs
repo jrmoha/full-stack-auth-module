@@ -36,7 +36,10 @@ export default defineConfig([
   {
     languageOptions: {
       parserOptions: {
-        projectService: true,
+        projectService: {
+          // Config files that no tsconfig includes.
+          allowDefaultProject: ['apps/api/vitest.config.ts'],
+        },
         tsconfigRootDir: import.meta.dirname,
       },
     },
