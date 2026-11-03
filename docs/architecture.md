@@ -202,7 +202,7 @@ Root `pnpm dev` starts the Mongo container, then both apps in parallel.
 | `NODE_ENV` | api | yes | `development` | One of development, test, production. Drives Swagger, log format, cookie default |
 | `PORT` | api | no (default 4000) | `4000` | HTTP port |
 | `MONGODB_URI` | api | yes | `mongodb://localhost:27017/auth_dev` | Database connection |
-| `JWT_SECRET` | api | yes, at least 32 characters, no default | `replace-with-64-random-hex-characters-0000000000000000000000000` | HS256 signing key |
+| `JWT_SECRET` | api | yes, at least 32 characters, no default | `replace-with-64-random-hex-characters-0000000000000000000000000` | HS256 signing key. The example value is refused at boot; generate one with `openssl rand -hex 32` |
 | `JWT_TTL_SECONDS` | api | no (default 3600) | `3600` | Token lifetime and cookie Max-Age |
 | `WEB_ORIGIN` | api | yes | `http://localhost:3000` | Only allowed CORS origin |
 | `COOKIE_SECURE` | api | no (default true in production, false otherwise) | `false` | Secure cookie flag. Boot refuses `false` when NODE_ENV is production |

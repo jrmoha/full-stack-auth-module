@@ -1,12 +1,20 @@
 import { NestFactory } from '@nestjs/core';
+import { ConfigService } from '@nestjs/config';
 import { AppModule } from './app.module.js';
-
-// Port is fixed until task 0.3 introduces validated config (architecture §7).
-const PORT = 4000;
+import type { Env } from './config/index.js';
 
 async function bootstrap(): Promise<void> {
-  const app = await NestFactory.create(AppModule);
-  await app.listen(PORT);
+  // abortOnError: false so a failed boot exits 1 here instead of process.abort().
+  const app = await NestFactory.create(AppModule, { abortOnError: false });
+  const config = app.get<ConfigService<Env, true>>(ConfigService);
+  await app.listen(config.get('PORT', { infer: true }));
 }
 
-await bootstrap();
+try {
+  await bootstrap();
+} catch (error: unknown) {
+  // Name and message only: env errors carry variable names, never values (architecture §8).
+  const reason = error instanceof Error ? `${error.name}: ${error.message}` : 'Unknown error';
+  console.error(`API failed to start. ${reason}`);
+  process.exit(1);
+}

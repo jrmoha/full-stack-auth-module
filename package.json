@@ -6,7 +6,7 @@
     "node": ">=24.15.0"
   },
   "scripts": {
-    "dev": "pnpm -r --parallel --stream dev",
+    "dev": "docker compose up -d --wait mongo && pnpm -r --parallel --stream dev",
     "build": "pnpm -r build",
     "lint": "eslint .",
     "typecheck": "pnpm -r typecheck",
