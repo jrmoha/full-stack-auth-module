@@ -1,0 +1,5 @@
+- Passwords are hashed with argon2id only; no response, log line or error ever contains a password, hash, cookie or authorization value (architecture §10 redaction list).
+- The JWT lives only in the httpOnly `access_token` cookie: never in a response body, browser storage or client JS; the web app learns the session only via server-side `GET /auth/me`.
+- A validation change updates Zod, the API DTO, architecture §4 and `fixtures/validation-cases.json` in the same commit, with both test suites passing.
+- Tests connect only through `TEST_MONGODB_URI` (database name ends in `_test`); never `MONGODB_URI`, never drop the database.
+- Every task commit includes its AI.md entry and its roadmap tick.
