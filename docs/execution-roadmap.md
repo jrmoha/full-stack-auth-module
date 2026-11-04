@@ -184,6 +184,7 @@ Visual reference: [`docs/design/`](design/README.md) (Auth App v2). It governs l
 | # | Task | Status | Depends on | Runs via | Gate | Notes |
 |---|---|---|---|---|---|---|
 | 2.0 | Design reference and theme | ✅ | 0.2 | main session | — | Design copy in `docs/design/`, theme tokens and font. No reviewer (L) |
+| 2.0b | Visual preview of the M2 screens | ✅ | 2.0 | main session | — | `/signin`, `/signup`, `/app` built from the design, not connected to the API; 2.2 to 2.5 wire them. No reviewer (L) |
 | 2.1 | Web Zod schemas with parity tests | ⬜ | 1.3 | main session | — | Parallel with 1.2 onward. No reviewer (L) |
 | 2.2 | API client, session helper and app shell | ⬜ | 0.4, 0.5 | researcher → main session | — | Async cookies, no-store fetch, redirects |
 | 2.3 | `/app` page and logout button | ⬜ | 2.2, 1.7 | main session | — | Playwright MCP check. No reviewer (L) |
