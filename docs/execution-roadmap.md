@@ -282,7 +282,7 @@ Visual reference: [`docs/design/`](design/README.md) (Auth App v2). It governs l
 |---|---|---|---|---|---|---|
 | 4.1 | README | ✅ | 3.1, 3.2 | main session | — | No reviewer (L) |
 | 4.2 | AI.md summary and future improvements | ✅ | 4.1 | main session | — | Summary built from existing entries. No reviewer (L) |
-| 4.3 | Clean-clone check and release | 🔄 | 4.2 | main session | push, public | Owner shares the link. No reviewer (L) |
+| 4.3 | Clean-clone check and release | ✅ | 4.2 | main session | push, public | Owner shares the link. No reviewer (L) |
 
 ### Task specs
 
