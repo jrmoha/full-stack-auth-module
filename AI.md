@@ -266,3 +266,12 @@ Copy this block for each task, in roadmap order.
 - Verified by: Chrome DevTools MCP against a production build with its own API: a wrong password and an unknown email both show the identical alert "Invalid email or password"; past the limit the alert reads "Too many attempts. Try again in 60 seconds." (from `Retry-After`); an empty submit focuses the email field with both required messages; a padded uppercase email signs in and lands on `/app`; a signed-in visit to `/signin` goes to `/app`; logout returns to `/signin` (the M2 loop: sign up, `/app`, log out, sign in); tab order email → password → Show password → submit; no horizontal scroll at 320 px; no console messages. `pnpm test` (web 114, API 289), `pnpm lint`, `pnpm typecheck`, web build. No reviewer (L).
 - Corrected or reworked: none beyond the 2.4 fixes applied before commit.
 - Differed from AI suggestion: none.
+
+
+### 0.1 AI workflow (completed 2026-11-04)
+- Date / time spent: 2026-11-04, about 10 min
+- AI-generated: `.claude/agents/researcher.md` (read-only; context7 and official sources; version-specific facts with sources, "unconfirmed" where unsure), `.claude/agents/governance-reviewer.md` (read-only; checks the CLAUDE.md non-negotiables, scope, the spec and correctness; verdict PASS, FLAG or BLOCK), `.mcp.json` (context7 `@upstash/context7-mcp@4.5.0`, playwright `@playwright/mcp@0.0.84`, github through the official remote server with the token read from `GITHUB_PERSONAL_ACCESS_TOKEN`, so no secret is committed), and the `## Non-negotiables` heading in `CLAUDE.md`.
+- Why now: the bootstrap check found row 0.1 marked ✅ without these files, so tasks 0.2 to 2.5 ran with stand-ins (a general-purpose subagent for research, `code-reviewer` for review, Chrome DevTools MCP for browser checks), as each entry records. From 3.1 on the real agents and MCP servers are available once the session restarts.
+- Verified by: `.mcp.json` parses; package names and versions checked on npm; the GitHub remote URL taken from the official server's README. The agents' `mcp__context7` tool entry is unconfirmed until the next session loads it.
+- Corrected or reworked: the "Before 2026-11-03 … owner review" 0.1 entry above described files that did not exist; this entry supersedes it.
+- Differed from AI suggestion: none.
