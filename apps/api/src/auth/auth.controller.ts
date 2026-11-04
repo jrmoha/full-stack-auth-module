@@ -3,6 +3,7 @@ import type { Response } from 'express';
 import type { PublicUser } from '../users/public-user.js';
 import { AuthService } from './auth.service.js';
 import { setAuthCookie } from './cookie.js';
+import { SigninDto } from './dto/signin.dto.js';
 import { SignupDto } from './dto/signup.dto.js';
 
 /** HTTP only: validated DTO in, service call, cookie and `{ user }` out (architecture §3). */
@@ -17,6 +18,17 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ user: PublicUser }> {
     const { user, token } = await this.auth.signup(dto);
+    setAuthCookie(res, token, this.auth.cookieConfig);
+    return { user };
+  }
+
+  @Post('signin')
+  @HttpCode(HttpStatus.OK)
+  async signin(
+    @Body() dto: SigninDto,
+    @Res({ passthrough: true }) res: Response,
+  ): Promise<{ user: PublicUser }> {
+    const { user, token } = await this.auth.signin(dto);
     setAuthCookie(res, token, this.auth.cookieConfig);
     return { user };
   }

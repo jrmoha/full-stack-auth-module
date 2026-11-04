@@ -159,3 +159,13 @@ Copy this block for each task, in roadmap order.
 - Verified by: `pnpm test` (220 tests with 1.4 alone), `pnpm lint`, `pnpm typecheck`, `pnpm build`; the 5 parallel signups gave one 201, four 409 and one document. Reviewer: `code-reviewer`, verdict PASS; it decoded a real token (header HS256, payload `sub`, `iat`, `exp` only, 3600 s).
 - Corrected or reworked: `ConfigModule` reads the environment once when `AppModule` is defined, so a per-test `COOKIE_SECURE` could not come from `process.env`; the test factory now replaces the `ConfigService` with one built from validated env plus overrides. Review notes applied: the claims and HS256 header are now asserted in a test, the log test also asserts the token is absent and that logs were captured, and all optional env values are pinned for tests because `ConfigModule` also reads the developer's `apps/api/.env`.
 - Differed from AI suggestion: none.
+
+
+### 1.5 `POST /auth/signin`
+- Date / time spent: 2026-11-04, about 20 min (estimate 20)
+- AI-generated: `AuthService.signin` and the `POST /auth/signin` route; `password-hasher.ts` (an injectable argon2id wrapper used by signup and signin, with the dummy verify); `test/auth/signin.spec.ts` (45 tests: every signin fixture row, mixed-case email, identical unknown-email and wrong-password bodies, one argon2id verify on both paths, malformed stored hash, passwords never trimmed); the password-hashing ADR wording.
+- Distinct errors for unknown email and wrong password: no. The first draft already returned one 401 `INVALID_CREDENTIALS` "Invalid email or password" for both, with no cookie, and ran a dummy verify for unknown emails.
+- Prompt or approach: per the M1 plan. Hashing moved behind `PasswordHasher` because `argon2` is CommonJS and its ESM namespace cannot be spied on; the spec's spy test needs an observable call.
+- Verified by: `pnpm test` (265 tests with 1.5 alone), `pnpm lint`, `pnpm typecheck`, `pnpm build`. Reviewer: `code-reviewer`, verdict FLAG; fixed below.
+- Corrected or reworked (from review): the dummy hash started as an empty string filled at module init, and verifying against an empty hash throws, so an unknown email could return 500 where a wrong password returns 401; it is now built lazily and cached. A malformed stored hash also made argon2 throw, giving a 500 that confirms the account exists; `verify` now returns false and logs a warning (tested). The spy test now asserts an argon2id hash is verified on the unknown-email path and one verify on the wrong-password path; a positive test shows a password registered with spaces signs in only with them. The ADR said the dummy verify uses "a fixed hash"; it now says a hash of a random secret generated once per process.
+- Differed from AI suggestion: none.

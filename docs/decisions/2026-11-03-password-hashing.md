@@ -8,7 +8,7 @@
 The brief requires a production-ready auth module. Passwords allow up to 128 characters (architecture §4). The hash format is stored data and outlives the code.
 
 ## Decision
-Hash with argon2id via the `argon2` package using library default parameters. Signin for an unknown email runs a dummy verify against a fixed hash so response time does not reveal account existence.
+Hash with argon2id via the `argon2` package using library default parameters. Signin for an unknown email runs a dummy verify against a hash of a random secret, generated once per process with the same parameters, so response time does not reveal account existence.
 
 ## Alternatives Considered
 ### Option A - bcrypt

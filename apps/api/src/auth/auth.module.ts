@@ -5,6 +5,7 @@ import type { Env } from '../config/index.js';
 import { UsersModule } from '../users/users.module.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
+import { PasswordHasher } from './password-hasher.js';
 
 /** HS256 pinned for signing and verifying, 30 s clock tolerance (architecture §10). */
 export const JWT_ALGORITHM = 'HS256';
@@ -29,6 +30,6 @@ export const JWT_CLOCK_TOLERANCE_SECONDS = 30;
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService],
+  providers: [AuthService, PasswordHasher],
 })
 export class AuthModule {}
