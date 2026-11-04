@@ -1,6 +1,8 @@
 import { redirect } from 'next/navigation';
+import { getSession } from '@/lib/session';
 
-// Preview: always the signin screen. Task 2.2 checks the session and sends signed-in users to /app (architecture §5).
-export default function HomePage() {
-  redirect('/signin');
+// Dynamic (reads cookies). Signed-in users go to /app, everyone else to /signin (architecture §5).
+export default async function HomePage() {
+  const user = await getSession();
+  redirect(user ? '/app' : '/signin');
 }
