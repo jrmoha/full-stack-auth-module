@@ -275,3 +275,13 @@ Copy this block for each task, in roadmap order.
 - Verified by: `.mcp.json` parses; package names and versions checked on npm; the GitHub remote URL taken from the official server's README. The agents' `mcp__context7` tool entry is unconfirmed until the next session loads it.
 - Corrected or reworked: the "Before 2026-11-03 … owner review" 0.1 entry above described files that did not exist; this entry supersedes it.
 - Differed from AI suggestion: none.
+
+
+### Follow-up: open items after M2
+- Date / time spent: 2026-11-04, about 15 min
+- What changed:
+  - Docs, from the 0.4 finding: §6's sequence diagram said the rewrite "(forwards client IP)", which is wrong; it now says the rewrite passes `X-Forwarded-For` through and adds none. §10 and the §7 production row now state that per-client rate limiting needs an edge proxy that appends `X-Forwarded-For`; a future-improvements row covers deploying without one.
+  - Local Mongo moved to host port 27018 (`docker-compose.yml`, §7 examples, `apps/api/.env.example`, and the owner's local `apps/api/.env`), because another project's `mongo` container also binds 27017 and whichever started first silently took the port. The container still listens on 27017 inside; the data volume is unchanged.
+  - The stray `AI.md` header edit (the `<!-- AI.md -->` line removed and `# AI Usage` without its `#`) was discarded; no entries were affected.
+- Verified by: `pnpm test` (API 289, web 114) against Mongo on 27018 using the local `.env`; the API booted from `.env` and answered; `pnpm lint`; `prettier --check`.
+- Differed from AI suggestion: the AI first recommended stopping the other container (0.3); after the conflict recurred, the owner asked to resolve it and the port was moved instead.

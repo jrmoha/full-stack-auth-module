@@ -16,6 +16,7 @@
 |---|---|
 | Refresh tokens and revocation (server sessions or a denylist) | Sessions must outlive 1 hour, or a "log out everywhere" feature is needed |
 | Shared rate-limit store (Redis) | A second API instance is deployed |
+| Client IP without relying on an edge proxy (the Next.js rewrite adds no `X-Forwarded-For`) | The app is deployed without a reverse proxy that appends `X-Forwarded-For`, or Next.js gains a way to forward the socket address |
 | Email verification | Signup must stop revealing registered emails, or email ownership matters |
 | Password reset | Real users need account recovery (out of scope per the brief) |
 | Account lockout or progressive delays per account | Credential-stuffing traffic appears that per-IP limits miss |

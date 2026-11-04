@@ -150,7 +150,8 @@ Browser               Next.js web (:3000)               Nest API (:4000)        
   | POST /api/auth/signin    |                                 |                        |
   | {email, password}        |                                 |                        |
   |------------------------->| rewrite /api/* to API_URL       |                        |
-  |                          | (forwards client IP)            |                        |
+  |                          | (passes X-Forwarded-For through;|                        |
+  |                          |  adds none, see §10)            |                        |
   |                          |-------------------------------->| throttle by client IP  |
   |                          |                                 | ValidationPipe on DTO  |
   |                          |                                 | find user by email     |
@@ -186,10 +187,10 @@ Browser               Next.js web (:3000)               Nest API (:4000)        
 
 | Environment | Database | URLs | Index creation |
 |---|---|---|---|
-| Local dev | docker-compose `mongo:8`, database `auth_dev` | web `http://localhost:3000`, API `http://localhost:4000`, Swagger `http://localhost:4000/docs` | Mongoose autoIndex; the users module awaits model init at boot, so the API does not serve until the unique index exists |
+| Local dev | docker-compose `mongo:8` on host port 27018, database `auth_dev` | web `http://localhost:3000`, API `http://localhost:4000`, Swagger `http://localhost:4000/docs` | Mongoose autoIndex; the users module awaits model init at boot, so the API does not serve until the unique index exists |
 | Local test | Same container, database `auth_test` | API booted in-process (integration) or on :4000 (e2e) | Test setup awaits model init before the first test; cleanup deletes documents, never drops, so the index survives |
 | CI | GitHub Actions service container `mongo:8`, database `auth_test` | Same as local test | Same as local test |
-| Production (stance, not deployed) | Managed MongoDB over TLS | HTTPS only; web and API behind one proxy hop | autoIndex at boot is acceptable at this collection size; a large existing collection would get the index built out of band first. Boot fails loudly if the unique index cannot build (existing duplicates) |
+| Production (stance, not deployed) | Managed MongoDB over TLS | HTTPS only; web and API behind one proxy hop, an edge proxy that appends `X-Forwarded-For` (the Next.js rewrite adds none; §10) | autoIndex at boot is acceptable at this collection size; a large existing collection would get the index built out of band first. Boot fails loudly if the unique index cannot build (existing duplicates) |
 
 Migrations: N/A. A schema or index change is a Mongoose change plus an update to §4 in the same commit. Hosting and Dockerfiles are out of scope (see `docs/future-improvements.md`).
 
@@ -201,7 +202,7 @@ Root `pnpm dev` starts the Mongo container, then both apps in parallel.
 |---|---|---|---|---|
 | `NODE_ENV` | api | yes | `development` | One of development, test, production. Drives Swagger, log format, cookie default |
 | `PORT` | api | no (default 4000) | `4000` | HTTP port |
-| `MONGODB_URI` | api | yes | `mongodb://localhost:27017/auth_dev` | Database connection |
+| `MONGODB_URI` | api | yes | `mongodb://localhost:27018/auth_dev` | Database connection |
 | `JWT_SECRET` | api | yes, at least 32 characters, no default | `replace-with-64-random-hex-characters-0000000000000000000000000` | HS256 signing key. The example value is refused at boot; generate one with `openssl rand -hex 32` |
 | `JWT_TTL_SECONDS` | api | no (default 3600) | `3600` | Token lifetime and cookie Max-Age |
 | `WEB_ORIGIN` | api | yes | `http://localhost:3000` | Only allowed CORS origin |
@@ -210,7 +211,7 @@ Root `pnpm dev` starts the Mongo container, then both apps in parallel.
 | `THROTTLE_AUTH_LIMIT` | api | no (default 10) | `10` | Requests per window on signup and signin |
 | `THROTTLE_AUTH_TTL_SECONDS` | api | no (default 60) | `60` | Rate-limit window |
 | `LOG_LEVEL` | api | no (default info) | `info` | Pino level |
-| `TEST_MONGODB_URI` | api, web (e2e) | tests only | `mongodb://localhost:27017/auth_test` | Test database. Not read by the running app; the test guard requires the database name to end in `_test` and to differ from `MONGODB_URI` |
+| `TEST_MONGODB_URI` | api, web (e2e) | tests only | `mongodb://localhost:27018/auth_test` | Test database. Not read by the running app; the test guard requires the database name to end in `_test` and to differ from `MONGODB_URI` |
 | `API_URL` | web | yes, server-only | `http://localhost:4000` | Rewrite target and server-side session fetch |
 
 No `NEXT_PUBLIC_` variables exist. The browser only uses relative `/api` paths. App variables are validated at boot (api) and at build and start (web).
@@ -264,7 +265,7 @@ No `NEXT_PUBLIC_` variables exist. The browser only uses relative `/api` paths. 
 - CI provides `mongo:8` as a service container with database `auth_test`.
 
 ## 10. Security
-- **Rate limiting:** signup and signin, 10 requests per 60 s per client IP and per route (each has its own budget), in-memory store; IPv6 clients are grouped by /64. Client IP comes from the forwarded-for header with exactly `TRUST_PROXY_HOPS` (1) trusted. `/auth/me` and logout are not limited, because Next.js calls `/auth/me` server-to-server on every protected render.
+- **Rate limiting:** signup and signin, 10 requests per 60 s per client IP and per route (each has its own budget), in-memory store; IPv6 clients are grouped by /64. Client IP comes from the forwarded-for header with exactly `TRUST_PROXY_HOPS` (1) trusted. The Next.js rewrite does not add `X-Forwarded-For`: it passes the client's header through unchanged (verified in 0.4). So per-client limiting needs an edge proxy in front of the web app that appends the client address; without one, every user shares one bucket, and a client that sets its own header can choose its key. Locally that only affects development. `/auth/me` and logout are not limited, because Next.js calls `/auth/me` server-to-server on every protected render.
 - **Helmet:** defaults on the API. JSON endpoints keep the default CSP. Swagger UI routes get a relaxed CSP scoped to `/docs`, which exists only outside production.
 - **Web headers:** `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, set in Next.js config. A nonce-based CSP for the web app is deferred.
 - **CORS:** origin exactly `WEB_ORIGIN`, credentials allowed, methods GET and POST. Normal traffic is same-origin through the rewrite; CORS matters only for direct API calls.

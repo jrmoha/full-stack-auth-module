@@ -5,7 +5,8 @@ services:
   mongo:
     image: mongo:8
     ports:
-      - '127.0.0.1:27017:27017'
+      # Host port 27018, so another project's Mongo on 27017 can run alongside.
+      - '127.0.0.1:27018:27017'
     volumes:
       - mongo-data:/data/db
     healthcheck:
