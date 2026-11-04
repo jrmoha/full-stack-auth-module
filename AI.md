@@ -316,3 +316,11 @@ Copy this block for each task, in roadmap order.
 - Corrected or reworked (from review): after a local e2e run `pnpm lint` crashed on `.next-e2e` build output; it is now ignored by ESLint and excluded from the web tsconfig. The developer's `apps/api/.env` (also read by the API) could change `TRUST_PROXY_HOPS`, `LOG_LEVEL`, `JWT_TTL_SECONDS` and the throttle window in e2e; all are pinned. The web server runs with `NODE_ENV=production`. §7 and §9 now name the e2e ports, the `.next-e2e` build and `NEXT_DIST_DIR`. The cookie test also checks localStorage and sessionStorage for a token.
 - Process slip: the commit `f0b3c0d` went out without this entry. The command that appended it was chained after a Prettier check, which failed on the then-untracked README, so the append was skipped; the entry lands in this follow-up instead of rewriting a pushed commit.
 - Differed from AI suggestion: none.
+
+
+### 4.1 README
+- Date / time spent: 2026-11-04, about 10 min (estimate 15)
+- AI-generated: `README.md`: prerequisites (Node 24, pnpm 10.33 via corepack, Docker), setup (clone, install, both env files, generating `JWT_SECRET`), `pnpm dev` with the three URLs, tests (`pnpm test` with Mongo up, Playwright install, `pnpm e2e`), the scripts table, the four endpoints in brief, the layout, and links to the architecture, ADRs, roadmap, AI.md and future improvements (detail linked, not copied).
+- What the draft overstated or got wrong: nothing found at commit time. Every command had already been run in this session, and every relative link and section anchor was checked; 4.3 re-runs the commands from a fresh clone and fixes anything they expose here.
+- Verified by: link and anchor check, `prettier --check`. No reviewer (L).
+- Differed from AI suggestion: none.
