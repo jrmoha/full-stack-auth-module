@@ -50,10 +50,9 @@ the standalone design tool closes on 2026-12-14. The copy needs the tool's runti
 | `/app` header with brand and logout button | 2.3 | Logout is the client leaf `logout-button.tsx` |
 | Greeting, "Welcome to the application." heading, profile card | 2.3 | Card shows `name`, `email`, `id`, `createdAt` from `GET /auth/me` |
 
-**Visual preview (task 2.0b).** `/signin`, `/signup` and `/app` already render from these components with no API
-connection, behind a "Design preview" banner (`preview-banner.tsx`). Forms keep local state only; submitting shows a
-preview notice; `/app` shows a sample user; `/` always redirects to `/signin`. Tasks 2.2 to 2.5 add the session checks,
-React Hook Form with the 2.1 schemas and the API calls, then delete the banner and the sample data.
+**Visual preview (task 2.0b), now connected.** The screens were first built from these components without the API, behind a
+"Design preview" banner. Tasks 2.2 to 2.5 connected them (session checks, React Hook Form with the 2.1 schemas, API calls)
+and removed the banner and the sample data.
 
 ## Deviations from the prototype (architecture wins)
 

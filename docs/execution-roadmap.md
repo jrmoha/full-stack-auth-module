@@ -189,7 +189,7 @@ Visual reference: [`docs/design/`](design/README.md) (Auth App v2). It governs l
 | 2.2 | API client, session helper and app shell | ✅ | 0.4, 0.5 | researcher → main session | — | Async cookies, no-store fetch, redirects |
 | 2.3 | `/app` page and logout button | ✅ | 2.2, 1.7 | main session | — | Playwright MCP check. No reviewer (L) |
 | 2.4 | `/signup` page | ✅ | 2.1, 2.3, 1.4 | main session | — | Introduces form field and alert components |
-| 2.5 | `/signin` page | ⬜ | 2.4, 1.5 | main session | — | Reuses 2.4 components. No reviewer (L) |
+| 2.5 | `/signin` page | ✅ | 2.4, 1.5 | main session | — | Reuses 2.4 components. No reviewer (L) |
 
 ### Task specs
 

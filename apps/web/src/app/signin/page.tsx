@@ -1,11 +1,16 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { AuthShell } from '@/components/auth-shell';
 import { SigninForm } from '@/components/signin-form';
+import { getSession } from '@/lib/session';
 
 export const metadata: Metadata = { title: 'Sign in · Workspace' };
 
-// Server Component. Task 2.5 adds the session check that redirects signed-in users to /app (architecture §5).
-export default function SigninPage() {
+// Server Component, dynamic: signed-in users go to /app (architecture §5).
+export default async function SigninPage() {
+  if (await getSession()) {
+    redirect('/app');
+  }
   return (
     <AuthShell
       mode="signin"
@@ -14,7 +19,6 @@ export default function SigninPage() {
       switchPrompt="New here?"
       switchLabel="Create an account"
       switchHref="/signup"
-      preview
     >
       <SigninForm />
     </AuthShell>

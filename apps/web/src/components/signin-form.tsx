@@ -1,28 +1,64 @@
 'use client';
 
-import { useState, type SubmitEvent } from 'react';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { useRouter } from 'next/navigation';
+import { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { signin } from '@/lib/api-client';
+import type { FormError } from '@/lib/errors';
+import { type SigninInput, signinSchema, type SigninValues } from '@/lib/validation';
 import { FormAlert } from './form-alert';
 import { FormField } from './form-field';
 import { PasswordField } from './password-field';
 import { SubmitButton } from './submit-button';
 
+const FIELDS = ['email', 'password'] as const;
+
 /**
- * Visual preview of the signin form (design screen 01). Task 2.5 adds React Hook Form, the 2.1 Zod schema
- * and the API call; until then submitting only explains that it is not connected.
+ * Signin form (architecture §8), built from the 2.4 components. Wrong credentials, unknown email and 429 all
+ * land in the alert; field errors map onto fields. Success replaces history with /app.
  */
 export function SigninForm() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [notice, setNotice] = useState('');
+  const router = useRouter();
+  const [failure, setFailure] = useState<Pick<FormError, 'alert' | 'reference'>>({});
+  // Stays true until /app loads: isSubmitting ends when the handler returns, before navigation completes.
+  const [navigating, setNavigating] = useState(false);
+  const {
+    register,
+    handleSubmit,
+    setError,
+    formState: { errors, isSubmitting },
+  } = useForm<SigninInput, unknown, SigninValues>({
+    resolver: zodResolver(signinSchema),
+    mode: 'onTouched',
+    reValidateMode: 'onChange',
+    defaultValues: { email: '', password: '' },
+  });
 
-  const onSubmit = (event: SubmitEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setNotice('Preview only: signing in is connected in task 2.5.');
-  };
+  const onSubmit = handleSubmit(async (values) => {
+    setFailure({});
+    const result = await signin(values);
+    if (result.ok) {
+      setNavigating(true);
+      router.replace('/app');
+      return;
+    }
+    const { fieldErrors, alert, reference } = result.error;
+    const first = FIELDS.find((field) => fieldErrors[field]);
+    for (const field of FIELDS) {
+      const message = fieldErrors[field];
+      if (message) setError(field, { type: 'server', message }, { shouldFocus: field === first });
+    }
+    setFailure({ alert, reference });
+  });
 
   return (
-    <form noValidate onSubmit={onSubmit} className="flex flex-col gap-4">
-      {notice ? <FormAlert message={notice} /> : null}
+    <form noValidate onSubmit={(event) => void onSubmit(event)} className="flex flex-col gap-4">
+      {failure.alert ? (
+        <FormAlert
+          message={failure.reference ? `${failure.alert} ${failure.reference}` : failure.alert}
+        />
+      ) : null}
       <FormField
         id="signin-email"
         label="Email address"
@@ -30,22 +66,22 @@ export function SigninForm() {
         dir="ltr"
         autoComplete="email"
         placeholder="name@company.com"
-        value={email}
-        onChange={(e) => {
-          setEmail(e.target.value);
-        }}
+        error={errors.email?.message}
+        {...register('email')}
       />
       <PasswordField
         id="signin-password"
         label="Password"
         autoComplete="current-password"
         placeholder="Enter your password"
-        value={password}
-        onChange={(e) => {
-          setPassword(e.target.value);
-        }}
+        error={errors.password?.message}
+        {...register('password')}
       />
-      <SubmitButton label="Sign in" pendingLabel="Signing in…" pending={false} />
+      <SubmitButton
+        label="Sign in"
+        pendingLabel="Signing in…"
+        pending={isSubmitting || navigating}
+      />
     </form>
   );
 }
