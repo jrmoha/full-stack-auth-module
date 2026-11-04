@@ -14,7 +14,9 @@ concurrency:
 jobs:
   verify:
     name: Lint, typecheck, build, unit and integration tests
-    runs-on: ubuntu-latest
+    # Not ubuntu-latest (26.04): mongo:8 refuses to start on Linux kernels 6.19+ and service containers share
+    # the runner's kernel (https://jira.mongodb.org/browse/SERVER-121912). Revisit when a fixed mongo:8 ships.
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
 
     services:
