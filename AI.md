@@ -285,3 +285,12 @@ Copy this block for each task, in roadmap order.
   - The stray `AI.md` header edit (the `<!-- AI.md -->` line removed and `# AI Usage` without its `#`) was discarded; no entries were affected.
 - Verified by: `pnpm test` (API 289, web 114) against Mongo on 27018 using the local `.env`; the API booted from `.env` and answered; `pnpm lint`; `prettier --check`.
 - Differed from AI suggestion: the AI first recommended stopping the other container (0.3); after the conflict recurred, the owner asked to resolve it and the port was moved instead.
+
+
+### 0.6 CI skeleton
+- Date / time spent: 2026-11-04, about 25 min (estimate 15)
+- AI-generated: `.github/workflows/ci.yml`: on every push and pull request, a `mongo:8` service container with a `mongosh` ping health check, pnpm from `packageManager`, Node from `.nvmrc` with the pnpm store cached, `pnpm install --frozen-lockfile`, lint, typecheck, build, and both Vitest suites. Only non-secret values (owner-approved at the env gate): `API_URL` for the web build and `TEST_MONGODB_URI` for the service container; Vitest pins `NODE_ENV=test` and a test-only `JWT_SECRET` itself; no GitHub secrets.
+- CI config corrections (service container, cache key): the first two runs failed at "Initialize containers". MongoDB 8 refuses to start on Linux kernels 6.19 to 7.0.13 (its TCMalloc per-CPU caches crash with the kernel's rseq change, SERVER-121912), and `ubuntu-latest` (now 26.04) and `ubuntu-24.04` runners both have such kernels. The AI first pinned `ubuntu-24.04`, which did not help. Reading MongoDB's startup check showed it only fires when TCMalloc per-CPU caches are active, and the image sets `GLIBC_TUNABLES=glibc.pthread.rseq=0` to enable them; the service now sets `rseq=1`, so glibc keeps rseq and the caches stay off. The cache key needed no change (setup-node keys it on the lockfile).
+- Prompt or approach: the steps were run locally from a clean environment before the first push, so the remaining failures were the platform issue only. The AI.md entry and roadmap tick land in this follow-up commit because the validation needs the green run's link, which exists only after pushing.
+- Verified by: green run https://github.com/jrmoha/full-stack-auth-module/actions/runs/41838353764 (lint, typecheck, build; web 114 and API 289 tests against the service container; pnpm store cache saved). No reviewer (L).
+- Differed from AI suggestion: none.
