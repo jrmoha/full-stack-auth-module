@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  verify:
+    name: Lint, typecheck, build, unit and integration tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    services:
+      mongo:
+        image: mongo:8
+        ports:
+          - 27017:27017
+        # The job waits until mongosh answers ping (architecture §7: CI uses a mongo:8 service container).
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      # Non-secret values only (no GitHub secrets). The web config needs API_URL at build time.
+      API_URL: http://localhost:4000
+      TEST_MONGODB_URI: mongodb://localhost:27017/auth_test
+
+    steps:
+      - uses: actions/checkout@v7
+
+      # Uses the pnpm version pinned in package.json "packageManager".
+      - uses: pnpm/action-setup@v6
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm build
+
+      # Vitest pins NODE_ENV=test and a test-only JWT_SECRET itself (apps/api/vitest.config.ts); the guard
+      # refuses any database not ending in _test.
+      - run: pnpm test
