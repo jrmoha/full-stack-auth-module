@@ -179,3 +179,13 @@ Copy this block for each task, in roadmap order.
 - Verified by: `pnpm test` (278 tests with 1.6 alone), `pnpm lint`, `pnpm typecheck`, `pnpm build`. Reviewer: `code-reviewer`, verdict FLAG; fixed below.
 - Corrected or reworked: the reviewer found the guard turned every error into a 401, so with Mongo down during the session check `/auth/me` returned 401 instead of 503 (§8). Because the web app calls `/auth/me` on every protected render, an outage would have looked like a sign-out. Token problems arrive as `user === false` with no error, so the guard now rethrows real errors and keeps the 401 for the rest; a test forces a server-selection error and expects 503. The tolerance tests now pin the boundary at 25 s (200) and 35 s (401). The 401 message was defined twice; now one constant.
 - Differed from AI suggestion: none.
+
+
+### 1.7 `POST /auth/logout`
+- Date / time spent: 2026-11-04, about 10 min (estimate 10)
+- AI-generated: the `POST /auth/logout` route (204, `clearAuthCookie` from 1.4); `test/auth/logout.spec.ts` (5 tests: clearing attributes equal the issuing ones apart from lifetime, Max-Age 0, with and without an incoming cookie, with an invalid cookie, `/auth/me` 401 afterwards through a cookie-keeping agent, Secure under `COOKIE_SECURE=true`).
+- Guarded or anonymous: the AI made it anonymous from the start, as §5 specifies, so a user with an expired or missing cookie can always log out; no change was needed.
+- Prompt or approach: tests written while 1.6 was in review; the route added after the 1.6 commit. Issuing and clearing share one attribute builder, so they cannot drift.
+- Verified by: `pnpm test` (283 tests), `pnpm lint`, `pnpm typecheck`, `pnpm build`. No reviewer (L).
+- Corrected or reworked: none.
+- Differed from AI suggestion: none.

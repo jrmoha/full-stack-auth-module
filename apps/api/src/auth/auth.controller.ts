@@ -12,7 +12,7 @@ import {
 import type { Request, Response } from 'express';
 import type { PublicUser } from '../users/public-user.js';
 import { AuthService } from './auth.service.js';
-import { setAuthCookie } from './cookie.js';
+import { clearAuthCookie, setAuthCookie } from './cookie.js';
 import { SigninDto } from './dto/signin.dto.js';
 import { JwtAuthGuard } from './jwt-auth.guard.js';
 import { SignupDto } from './dto/signup.dto.js';
@@ -49,5 +49,15 @@ export class AuthController {
   @UseGuards(JwtAuthGuard)
   me(@Req() req: Request & { user: PublicUser }): { user: PublicUser } {
     return { user: req.user };
+  }
+
+  /**
+   * Anonymous and idempotent: clears the cookie whether or not one was sent (architecture §5). The token itself
+   * stays valid until it expires (no revocation, see the session ADR).
+   */
+  @Post('logout')
+  @HttpCode(HttpStatus.NO_CONTENT)
+  logout(@Res({ passthrough: true }) res: Response): void {
+    clearAuthCookie(res, this.auth.cookieConfig);
   }
 }
