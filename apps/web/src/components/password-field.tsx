@@ -1,10 +1,10 @@
 'use client';
 
-import { useState, type InputHTMLAttributes } from 'react';
+import { type ComponentPropsWithRef, useState } from 'react';
 import { inputClass } from './field-styles';
 
 interface PasswordFieldProps extends Omit<
-  InputHTMLAttributes<HTMLInputElement>,
+  ComponentPropsWithRef<'input'>,
   'id' | 'className' | 'type'
 > {
   id: string;
@@ -40,14 +40,14 @@ export function PasswordField({ id, label, error, hintId, ...input }: PasswordFi
           }}
           aria-controls={id}
           aria-pressed={visible}
-          aria-label={visible ? 'Hide password' : 'Show password'}
+          aria-label="Show password"
           className="absolute end-1.5 top-1/2 h-8 -translate-y-1/2 cursor-pointer rounded-lg px-2.5 text-xs font-bold text-brand hover:bg-brand-tint"
         >
           {visible ? 'Hide' : 'Show'}
         </button>
       </span>
       {error ? (
-        <span id={errorId} role="alert" className="text-xs font-semibold text-danger">
+        <span id={errorId} aria-live="polite" className="text-xs font-semibold text-danger">
           {error}
         </span>
       ) : null}

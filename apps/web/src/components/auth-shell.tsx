@@ -12,6 +12,8 @@ interface AuthShellProps {
   switchPrompt: string;
   switchLabel: string;
   switchHref: '/signin' | '/signup';
+  /** Shows the design-preview banner while the page is not yet connected to the API. */
+  preview?: boolean;
   children: ReactNode;
 }
 
@@ -19,7 +21,7 @@ interface AuthShellProps {
 export function AuthShell(props: AuthShellProps) {
   return (
     <>
-      <PreviewBanner />
+      {props.preview ? <PreviewBanner /> : null}
       <div className="flex min-h-screen flex-wrap gap-4 bg-surface p-4">
         <div className="flex min-w-0 flex-[1_1_440px] flex-col px-4 pt-3 pb-6">
           <header>

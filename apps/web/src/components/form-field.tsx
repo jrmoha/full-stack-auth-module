@@ -1,7 +1,7 @@
-import type { InputHTMLAttributes } from 'react';
+import type { ComponentPropsWithRef } from 'react';
 import { inputClass } from './field-styles';
 
-interface FormFieldProps extends Omit<InputHTMLAttributes<HTMLInputElement>, 'id' | 'className'> {
+interface FormFieldProps extends Omit<ComponentPropsWithRef<'input'>, 'id' | 'className'> {
   id: string;
   label: string;
   error?: string | undefined;
@@ -23,7 +23,7 @@ export function FormField({ id, label, error, ...input }: FormFieldProps) {
         {...input}
       />
       {error ? (
-        <span id={errorId} role="alert" className="text-xs font-semibold text-danger">
+        <span id={errorId} aria-live="polite" className="text-xs font-semibold text-danger">
           {error}
         </span>
       ) : null}

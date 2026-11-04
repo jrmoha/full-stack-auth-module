@@ -14,6 +14,7 @@ export default function SigninPage() {
       switchPrompt="New here?"
       switchLabel="Create an account"
       switchHref="/signup"
+      preview
     >
       <SigninForm />
     </AuthShell>
