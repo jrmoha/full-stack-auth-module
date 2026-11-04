@@ -84,7 +84,7 @@ Estimates are wall-clock minutes for one governed loop. Tasks marked "no reviewe
 
 | # | Task | Status | Depends on | Runs via | Gate | Notes |
 |---|---|---|---|---|---|---|
-| 1.1 | API app setup, logging and errors | ⬜ | 0.5 | researcher → main session | — | nestjs-pino, filter, shared setup function |
+| 1.1 | API app setup, logging and errors | ✅ | 0.5 | researcher → main session | — | nestjs-pino, filter, shared setup function |
 | 1.2 | Users module | ⬜ | 1.1 | main session | — | Unique index awaited at boot |
 | 1.3 | Validation fixtures and API DTOs | ⬜ | 0.5 | main session | — | Parallel with 1.1 |
 | 1.4 | `POST /auth/signup` | ⬜ | 1.2, 1.3 | main session | — | Includes concurrent duplicate test |

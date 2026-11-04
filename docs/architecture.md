@@ -224,6 +224,7 @@ No `NEXT_PUBLIC_` variables exist. The browser only uses relative `/api` paths. 
 - Throttler rejection: 429 `RATE_LIMITED` with `Retry-After`.
 - Mongo down at boot: connection fails within the 5 s server-selection timeout and the process exits non-zero. Mongo down at runtime: server-selection errors map to 503 `SERVICE_UNAVAILABLE`.
 - Invalid env at boot: the process exits non-zero listing failing variable names, never values.
+- Unreadable request: invalid JSON is 400, a body over 10 KB is 413, an unsupported charset is 415; each uses code `VALIDATION_FAILED` without `fieldErrors`. A non-JSON content type (e.g. URL-encoded) is not parsed, so the DTO rejects it with 400. Every error response, including these, carries `requestId` and the `x-request-id` header.
 
 **Web**
 - `app/error.tsx` catches render errors, including the session helper throwing when the API is down: shows "Something went wrong" and a retry button. Next.js requires it to be a client component; this is the one allowed exception to the leaf-only rule.

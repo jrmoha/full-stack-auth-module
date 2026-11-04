@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongooseError } from 'mongoose';
+import { LoggingModule } from './common/logging/logger.module.js';
 import { type Env, validateEnv } from './config/index.js';
 
 /** Fail fast when Mongo is unreachable (architecture §8): one 5 s attempt, no retries. */
@@ -17,6 +18,7 @@ const MONGO_SERVER_SELECTION_TIMEOUT_MS = 5000;
       envFilePath: join(import.meta.dirname, '..', '.env'),
       validate: validateEnv,
     }),
+    LoggingModule,
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<Env, true>) => ({
