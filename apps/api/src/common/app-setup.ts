@@ -7,6 +7,7 @@ import cookieParser from 'cookie-parser';
 import helmet from 'helmet';
 import { Logger } from 'nestjs-pino';
 import type { Env } from '../config/index.js';
+import { mountApiDocs } from './docs/api-docs.js';
 import { validationExceptionFactory } from './errors/validation-exception.factory.js';
 import { AllExceptionsFilter } from './filters/all-exceptions.filter.js';
 import { REQUEST_ID_HEADER } from './logging/logger.module.js';
@@ -51,4 +52,9 @@ export function configureApp(app: NestExpressApplication): void {
     }),
   );
   app.useGlobalFilters(new AllExceptionsFilter());
+
+  // Swagger UI and the OpenAPI JSON exist only outside production (swagger-exposure ADR).
+  if (config.get('NODE_ENV', { infer: true }) !== 'production') {
+    mountApiDocs(app);
+  }
 }

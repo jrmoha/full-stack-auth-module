@@ -7,3 +7,5 @@ allowBuilds:
   '@swc/core': false
   # Native addon; the install script selects the prebuilt binary (node-gyp-build). Needed for hashing.
   argon2: true
+  # Install-time telemetry from swagger-ui-dist (via @nestjs/swagger); not needed to run.
+  '@scarf/scarf': false
