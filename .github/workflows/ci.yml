@@ -58,3 +58,44 @@ jobs:
       # Vitest pins NODE_ENV=test and a test-only JWT_SECRET itself (apps/api/vitest.config.ts); the guard
       # refuses any database not ending in _test.
       - run: pnpm test
+
+  e2e:
+    name: End-to-end (Playwright, production builds)
+    needs: verify
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+
+    services:
+      mongo:
+        image: mongo:8
+        ports:
+          - 27017:27017
+        # Same kernel 6.19+ workaround as the verify job (SERVER-121912).
+        env:
+          GLIBC_TUNABLES: glibc.pthread.rseq=1
+        options: >-
+          --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 20
+
+    env:
+      # The e2e API and web servers get their own values from apps/web/playwright.config.ts.
+      TEST_MONGODB_URI: mongodb://localhost:27017/auth_test
+
+    steps:
+      - uses: actions/checkout@v7
+      - uses: pnpm/action-setup@v6
+      - uses: actions/setup-node@v7
+        with:
+          node-version-file: .nvmrc
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter web exec playwright install --with-deps chromium
+      - run: pnpm e2e
+      - uses: actions/upload-artifact@v7
+        if: failure()
+        with:
+          name: playwright-report
+          path: apps/web/playwright-report/
+          retention-days: 7

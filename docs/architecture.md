@@ -188,7 +188,7 @@ Browser               Next.js web (:3000)               Nest API (:4000)        
 | Environment | Database | URLs | Index creation |
 |---|---|---|---|
 | Local dev | docker-compose `mongo:8` on host port 27018, database `auth_dev` | web `http://localhost:3000`, API `http://localhost:4000`, Swagger `http://localhost:4000/docs` | Mongoose autoIndex; the users module awaits model init at boot, so the API does not serve until the unique index exists |
-| Local test | Same container, database `auth_test` | API booted in-process (integration) or on :4000 (e2e) | Test setup awaits model init before the first test; cleanup deletes documents, never drops, so the index survives |
+| Local test | Same container, database `auth_test` | API booted in-process (integration) or, for e2e, production builds on :4200 (API) and :3200 (web), the web build in `.next-e2e` | Test setup awaits model init before the first test; cleanup deletes documents, never drops, so the index survives |
 | CI | GitHub Actions service container `mongo:8`, database `auth_test` | Same as local test | Same as local test |
 | Production (stance, not deployed) | Managed MongoDB over TLS | HTTPS only; web and API behind one proxy hop, an edge proxy that appends `X-Forwarded-For` (the Next.js rewrite adds none; §10) | autoIndex at boot is acceptable at this collection size; a large existing collection would get the index built out of band first. Boot fails loudly if the unique index cannot build (existing duplicates) |
 
@@ -214,7 +214,7 @@ Root `pnpm dev` starts the Mongo container, then both apps in parallel.
 | `TEST_MONGODB_URI` | api, web (e2e) | tests only | `mongodb://localhost:27018/auth_test` | Test database. Not read by the running app; the test guard requires the database name to end in `_test` and to differ from `MONGODB_URI` |
 | `API_URL` | web | yes, server-only | `http://localhost:4000` | Rewrite target and server-side session fetch |
 
-No `NEXT_PUBLIC_` variables exist. The browser only uses relative `/api` paths. App variables are validated at boot (api) and at build and start (web).
+`NEXT_DIST_DIR` (web, optional, build tooling only) moves the Next.js build directory; the e2e build uses `.next-e2e` so it never replaces the regular build. No `NEXT_PUBLIC_` variables exist. The browser only uses relative `/api` paths. App variables are validated at boot (api) and at build and start (web).
 
 ## 8. Error handling
 

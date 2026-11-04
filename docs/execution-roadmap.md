@@ -250,7 +250,7 @@ Visual reference: [`docs/design/`](design/README.md) (Auth App v2). It governs l
 | # | Task | Status | Depends on | Runs via | Gate | Notes |
 |---|---|---|---|---|---|---|
 | 3.1 | Swagger at `/docs` | ✅ | 1.8 | researcher → main session | — | Default Helmet CSP suffices; no relaxation needed |
-| 3.2 | E2E suite and CI job | ⬜ | 2.5, 1.8, 0.6 | researcher → main session | push | Production builds, test DB |
+| 3.2 | E2E suite and CI job | ✅ | 2.5, 1.8, 0.6 | researcher → main session | push | Production builds, test DB |
 
 ### Task specs
 

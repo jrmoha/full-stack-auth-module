@@ -13,6 +13,8 @@ const securityHeaders = [
 ];
 
 const nextConfig: NextConfig = {
+  // The e2e build uses its own directory so it never replaces the regular build (playwright.config.ts).
+  distDir: process.env.NEXT_DIST_DIR ?? '.next',
   // Stop `next dev` from writing an AGENTS.md into the app; CLAUDE.md and docs/ are the agent guidance.
   agentRules: false,
   // Cache Components stay disabled (architecture §6).

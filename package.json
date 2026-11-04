@@ -13,7 +13,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "test": "pnpm -r test",
-    "e2e": "echo 'e2e: placeholder until task 3.2 (Playwright)' && exit 0"
+    "e2e": "pnpm --filter api build && pnpm --filter web e2e:build && pnpm --filter web e2e"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -20,3 +20,4 @@ test-results/
 next-env.d.ts
 *.tsbuildinfo
 .DS_Store
+.next-e2e/

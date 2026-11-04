@@ -29,7 +29,14 @@ const noCrossAppImports = (otherApp) => ({
 });
 
 export default defineConfig([
-  globalIgnores(['**/node_modules/', '**/dist/', '**/.next/', '**/next-env.d.ts', '**/coverage/']),
+  globalIgnores([
+    '**/node_modules/',
+    '**/dist/',
+    '**/.next/',
+    '**/.next-e2e/',
+    '**/next-env.d.ts',
+    '**/coverage/',
+  ]),
 
   js.configs.recommended,
   tseslint.configs.strictTypeChecked,
