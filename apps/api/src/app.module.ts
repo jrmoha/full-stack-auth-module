@@ -3,6 +3,7 @@ import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
 import { MongooseError } from 'mongoose';
+import { AuthModule } from './auth/auth.module.js';
 import { LoggingModule } from './common/logging/logger.module.js';
 import { type Env, validateEnv } from './config/index.js';
 import { UsersModule } from './users/users.module.js';
@@ -31,6 +32,7 @@ const MONGO_SERVER_SELECTION_TIMEOUT_MS = 5000;
       }),
     }),
     UsersModule,
+    AuthModule,
   ],
 })
 export class AppModule {}

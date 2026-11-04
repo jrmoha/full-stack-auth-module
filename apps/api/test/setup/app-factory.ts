@@ -1,4 +1,5 @@
 import type { DynamicModule, Type } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { getConnectionToken } from '@nestjs/mongoose';
 import type { NestExpressApplication } from '@nestjs/platform-express';
 import { Test } from '@nestjs/testing';
@@ -7,6 +8,7 @@ import type { DestinationStream } from 'pino';
 import { AppModule } from '../../src/app.module.js';
 import { configureApp } from '../../src/common/app-setup.js';
 import { LOG_DESTINATION } from '../../src/common/logging/log-destination.js';
+import { type Env, validateEnv } from '../../src/config/index.js';
 import { TEST_DB_SUFFIX } from './test-db.js';
 
 export interface TestApp {
@@ -19,6 +21,8 @@ export interface TestAppOptions {
   imports?: (Type | DynamicModule)[];
   /** Captures pino output; without it, logging is silent under NODE_ENV=test. */
   logDestination?: DestinationStream;
+  /** Per-app config values (e.g. COOKIE_SECURE, THROTTLE_AUTH_LIMIT); validated like the real env. */
+  config?: Partial<Record<keyof Env, string>>;
 }
 
 /**
@@ -29,6 +33,11 @@ export async function createTestApp(options: TestAppOptions = {}): Promise<TestA
   const builder = Test.createTestingModule({ imports: [AppModule, ...(options.imports ?? [])] });
   if (options.logDestination) {
     builder.overrideProvider(LOG_DESTINATION).useValue(options.logDestination);
+  }
+  if (options.config) {
+    // ConfigModule reads the environment once at import, so per-app values replace the ConfigService.
+    const env = validateEnv({ ...process.env, ...options.config });
+    builder.overrideProvider(ConfigService).useValue(new ConfigService(env));
   }
   const moduleRef = await builder.compile();
   const app = moduleRef.createNestApplication<NestExpressApplication>({
