@@ -1,0 +1,899 @@
+{
+  "description": "Architecture §4 validation cases. Both test suites run every row: the API DTOs (apps/api/test/auth/dto.spec.ts) and the web Zod schemas (apps/web/test/validation.spec.ts). Each row sets one field; the other fields take the base values. `omit` means the field is absent; `message` is the first failing §4 message; `normalized` is the value after normalization. A non-string value (number, boolean, null) counts as not present, so it reports the field's required message. Rows with `apiOnly` are skipped by the web suite. Lengths are JavaScript `length` (UTF-16 code units); whitespace is JavaScript `\\s`.",
+  "base": {
+    "signup": {
+      "email": "base@example.com",
+      "name": "Base User",
+      "password": "base-Pass1"
+    },
+    "signin": {
+      "email": "base@example.com",
+      "password": "base-Pass1"
+    }
+  },
+  "cases": [
+    {
+      "id": "signup-email-missing",
+      "form": "signup",
+      "field": "email",
+      "omit": true,
+      "valid": false,
+      "message": "Email is required"
+    },
+    {
+      "id": "signup-email-null",
+      "form": "signup",
+      "field": "email",
+      "input": null,
+      "valid": false,
+      "message": "Email is required"
+    },
+    {
+      "id": "signup-email-number",
+      "form": "signup",
+      "field": "email",
+      "input": 123,
+      "valid": false,
+      "message": "Email is required"
+    },
+    {
+      "id": "signup-email-empty",
+      "form": "signup",
+      "field": "email",
+      "input": "",
+      "valid": false,
+      "message": "Email is required"
+    },
+    {
+      "id": "signup-email-blank",
+      "form": "signup",
+      "field": "email",
+      "input": "   ",
+      "valid": false,
+      "message": "Email is required",
+      "note": "empty after trimming counts as not present"
+    },
+    {
+      "id": "signup-email-plain",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@company.com",
+      "valid": true,
+      "normalized": "dana@company.com"
+    },
+    {
+      "id": "signup-email-normalized",
+      "form": "signup",
+      "field": "email",
+      "input": "  Dana@Company.COM  ",
+      "valid": true,
+      "normalized": "dana@company.com",
+      "note": "trimmed and lowercased before checks"
+    },
+    {
+      "id": "signup-email-short",
+      "form": "signup",
+      "field": "email",
+      "input": "a@b.co",
+      "valid": true,
+      "normalized": "a@b.co"
+    },
+    {
+      "id": "signup-email-subdomain",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@mail.company.co",
+      "valid": true,
+      "normalized": "dana@mail.company.co"
+    },
+    {
+      "id": "signup-email-hyphen-label",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@my-company.com",
+      "valid": true,
+      "normalized": "dana@my-company.com"
+    },
+    {
+      "id": "signup-email-plus-local",
+      "form": "signup",
+      "field": "email",
+      "input": "dana+test@company.com",
+      "valid": true,
+      "normalized": "dana+test@company.com"
+    },
+    {
+      "id": "signup-email-254",
+      "form": "signup",
+      "field": "email",
+      "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+      "valid": true,
+      "normalized": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+      "note": "254 characters"
+    },
+    {
+      "id": "signup-email-255",
+      "form": "signup",
+      "field": "email",
+      "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+      "valid": false,
+      "message": "Email must be at most 254 characters",
+      "note": "255 characters"
+    },
+    {
+      "id": "signup-email-254-after-normalizing",
+      "form": "signup",
+      "field": "email",
+      "input": "  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA@EXAMPLE.COM  ",
+      "valid": true,
+      "normalized": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+      "note": "258 characters as typed, 254 after trimming; the limit applies to the normalized value"
+    },
+    {
+      "id": "signup-email-255-after-normalizing",
+      "form": "signup",
+      "field": "email",
+      "input": "  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA@EXAMPLE.COM  ",
+      "valid": false,
+      "message": "Email must be at most 254 characters",
+      "note": "255 characters after trimming"
+    },
+    {
+      "id": "signup-email-nbsp-in-local",
+      "form": "signup",
+      "field": "email",
+      "input": "da na@company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "NBSP is whitespace (JavaScript \\s)"
+    },
+    {
+      "id": "signup-email-nbsp-padded",
+      "form": "signup",
+      "field": "email",
+      "input": " dana@company.com ",
+      "valid": true,
+      "normalized": "dana@company.com",
+      "note": "trim removes NBSP"
+    },
+    {
+      "id": "signup-email-no-at",
+      "form": "signup",
+      "field": "email",
+      "input": "dana.company.com",
+      "valid": false,
+      "message": "Enter a valid email address"
+    },
+    {
+      "id": "signup-email-two-at",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@@company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "exactly one @"
+    },
+    {
+      "id": "signup-email-at-in-local",
+      "form": "signup",
+      "field": "email",
+      "input": "da@na@company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "exactly one @"
+    },
+    {
+      "id": "signup-email-empty-local",
+      "form": "signup",
+      "field": "email",
+      "input": "@company.com",
+      "valid": false,
+      "message": "Enter a valid email address"
+    },
+    {
+      "id": "signup-email-space-in-local",
+      "form": "signup",
+      "field": "email",
+      "input": "da na@company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "no whitespace in the local part"
+    },
+    {
+      "id": "signup-email-single-label",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@company",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "domain needs two or more labels"
+    },
+    {
+      "id": "signup-email-empty-label",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@company..com",
+      "valid": false,
+      "message": "Enter a valid email address"
+    },
+    {
+      "id": "signup-email-leading-hyphen",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@-company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "label may not start with a hyphen"
+    },
+    {
+      "id": "signup-email-trailing-hyphen",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@company-.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "label may not end with a hyphen"
+    },
+    {
+      "id": "signup-email-underscore-label",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@my_company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "labels are letters, digits or hyphens"
+    },
+    {
+      "id": "signup-email-short-tld",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@company.c",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "last label at least 2 letters"
+    },
+    {
+      "id": "signup-email-digit-tld",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@company.c0m",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "last label letters only"
+    },
+    {
+      "id": "signup-email-trailing-dot",
+      "form": "signup",
+      "field": "email",
+      "input": "dana@company.com.",
+      "valid": false,
+      "message": "Enter a valid email address"
+    },
+    {
+      "id": "signin-email-missing",
+      "form": "signin",
+      "field": "email",
+      "omit": true,
+      "valid": false,
+      "message": "Email is required"
+    },
+    {
+      "id": "signin-email-null",
+      "form": "signin",
+      "field": "email",
+      "input": null,
+      "valid": false,
+      "message": "Email is required"
+    },
+    {
+      "id": "signin-email-number",
+      "form": "signin",
+      "field": "email",
+      "input": 123,
+      "valid": false,
+      "message": "Email is required"
+    },
+    {
+      "id": "signin-email-empty",
+      "form": "signin",
+      "field": "email",
+      "input": "",
+      "valid": false,
+      "message": "Email is required"
+    },
+    {
+      "id": "signin-email-blank",
+      "form": "signin",
+      "field": "email",
+      "input": "   ",
+      "valid": false,
+      "message": "Email is required",
+      "note": "empty after trimming counts as not present"
+    },
+    {
+      "id": "signin-email-plain",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@company.com",
+      "valid": true,
+      "normalized": "dana@company.com"
+    },
+    {
+      "id": "signin-email-normalized",
+      "form": "signin",
+      "field": "email",
+      "input": "  Dana@Company.COM  ",
+      "valid": true,
+      "normalized": "dana@company.com",
+      "note": "trimmed and lowercased before checks"
+    },
+    {
+      "id": "signin-email-short",
+      "form": "signin",
+      "field": "email",
+      "input": "a@b.co",
+      "valid": true,
+      "normalized": "a@b.co"
+    },
+    {
+      "id": "signin-email-subdomain",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@mail.company.co",
+      "valid": true,
+      "normalized": "dana@mail.company.co"
+    },
+    {
+      "id": "signin-email-hyphen-label",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@my-company.com",
+      "valid": true,
+      "normalized": "dana@my-company.com"
+    },
+    {
+      "id": "signin-email-plus-local",
+      "form": "signin",
+      "field": "email",
+      "input": "dana+test@company.com",
+      "valid": true,
+      "normalized": "dana+test@company.com"
+    },
+    {
+      "id": "signin-email-254",
+      "form": "signin",
+      "field": "email",
+      "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+      "valid": true,
+      "normalized": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+      "note": "254 characters"
+    },
+    {
+      "id": "signin-email-255",
+      "form": "signin",
+      "field": "email",
+      "input": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+      "valid": false,
+      "message": "Email must be at most 254 characters",
+      "note": "255 characters"
+    },
+    {
+      "id": "signin-email-254-after-normalizing",
+      "form": "signin",
+      "field": "email",
+      "input": "  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA@EXAMPLE.COM  ",
+      "valid": true,
+      "normalized": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa@example.com",
+      "note": "258 characters as typed, 254 after trimming; the limit applies to the normalized value"
+    },
+    {
+      "id": "signin-email-255-after-normalizing",
+      "form": "signin",
+      "field": "email",
+      "input": "  AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA@EXAMPLE.COM  ",
+      "valid": false,
+      "message": "Email must be at most 254 characters",
+      "note": "255 characters after trimming"
+    },
+    {
+      "id": "signin-email-nbsp-in-local",
+      "form": "signin",
+      "field": "email",
+      "input": "da na@company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "NBSP is whitespace (JavaScript \\s)"
+    },
+    {
+      "id": "signin-email-nbsp-padded",
+      "form": "signin",
+      "field": "email",
+      "input": " dana@company.com ",
+      "valid": true,
+      "normalized": "dana@company.com",
+      "note": "trim removes NBSP"
+    },
+    {
+      "id": "signin-email-no-at",
+      "form": "signin",
+      "field": "email",
+      "input": "dana.company.com",
+      "valid": false,
+      "message": "Enter a valid email address"
+    },
+    {
+      "id": "signin-email-two-at",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@@company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "exactly one @"
+    },
+    {
+      "id": "signin-email-at-in-local",
+      "form": "signin",
+      "field": "email",
+      "input": "da@na@company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "exactly one @"
+    },
+    {
+      "id": "signin-email-empty-local",
+      "form": "signin",
+      "field": "email",
+      "input": "@company.com",
+      "valid": false,
+      "message": "Enter a valid email address"
+    },
+    {
+      "id": "signin-email-space-in-local",
+      "form": "signin",
+      "field": "email",
+      "input": "da na@company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "no whitespace in the local part"
+    },
+    {
+      "id": "signin-email-single-label",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@company",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "domain needs two or more labels"
+    },
+    {
+      "id": "signin-email-empty-label",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@company..com",
+      "valid": false,
+      "message": "Enter a valid email address"
+    },
+    {
+      "id": "signin-email-leading-hyphen",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@-company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "label may not start with a hyphen"
+    },
+    {
+      "id": "signin-email-trailing-hyphen",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@company-.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "label may not end with a hyphen"
+    },
+    {
+      "id": "signin-email-underscore-label",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@my_company.com",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "labels are letters, digits or hyphens"
+    },
+    {
+      "id": "signin-email-short-tld",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@company.c",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "last label at least 2 letters"
+    },
+    {
+      "id": "signin-email-digit-tld",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@company.c0m",
+      "valid": false,
+      "message": "Enter a valid email address",
+      "note": "last label letters only"
+    },
+    {
+      "id": "signin-email-trailing-dot",
+      "form": "signin",
+      "field": "email",
+      "input": "dana@company.com.",
+      "valid": false,
+      "message": "Enter a valid email address"
+    },
+    {
+      "id": "signup-name-missing",
+      "form": "signup",
+      "field": "name",
+      "omit": true,
+      "valid": false,
+      "message": "Name is required"
+    },
+    {
+      "id": "signup-name-number",
+      "form": "signup",
+      "field": "name",
+      "input": 42,
+      "valid": false,
+      "message": "Name is required"
+    },
+    {
+      "id": "signup-name-empty",
+      "form": "signup",
+      "field": "name",
+      "input": "",
+      "valid": false,
+      "message": "Name is required"
+    },
+    {
+      "id": "signup-name-blank",
+      "form": "signup",
+      "field": "name",
+      "input": "    ",
+      "valid": false,
+      "message": "Name is required",
+      "note": "empty after trimming counts as not present"
+    },
+    {
+      "id": "signup-name-2",
+      "form": "signup",
+      "field": "name",
+      "input": "ab",
+      "valid": false,
+      "message": "Name must be at least 3 characters"
+    },
+    {
+      "id": "signup-name-2-padded",
+      "form": "signup",
+      "field": "name",
+      "input": "  ab  ",
+      "valid": false,
+      "message": "Name must be at least 3 characters",
+      "note": "2 characters after trimming"
+    },
+    {
+      "id": "signup-name-3",
+      "form": "signup",
+      "field": "name",
+      "input": "abc",
+      "valid": true,
+      "normalized": "abc"
+    },
+    {
+      "id": "signup-name-3-padded",
+      "form": "signup",
+      "field": "name",
+      "input": "  abc  ",
+      "valid": true,
+      "normalized": "abc"
+    },
+    {
+      "id": "signup-name-50",
+      "form": "signup",
+      "field": "name",
+      "input": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+      "valid": true,
+      "normalized": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn"
+    },
+    {
+      "id": "signup-name-50-padded",
+      "form": "signup",
+      "field": "name",
+      "input": "  nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn  ",
+      "valid": true,
+      "normalized": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+      "note": "50 characters after trimming"
+    },
+    {
+      "id": "signup-name-51",
+      "form": "signup",
+      "field": "name",
+      "input": "nnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnnn",
+      "valid": false,
+      "message": "Name must be at most 50 characters"
+    },
+    {
+      "id": "signup-name-nbsp-padded",
+      "form": "signup",
+      "field": "name",
+      "input": " abc ",
+      "valid": true,
+      "normalized": "abc",
+      "note": "trim removes NBSP"
+    },
+    {
+      "id": "signup-name-25-emoji",
+      "form": "signup",
+      "field": "name",
+      "input": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "valid": true,
+      "normalized": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "note": "50 UTF-16 code units"
+    },
+    {
+      "id": "signup-name-26-emoji",
+      "form": "signup",
+      "field": "name",
+      "input": "😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀😀",
+      "valid": false,
+      "message": "Name must be at most 50 characters",
+      "note": "52 UTF-16 code units; lengths count JavaScript length"
+    },
+    {
+      "id": "signup-name-unicode",
+      "form": "signup",
+      "field": "name",
+      "input": "Zoë Ångström",
+      "valid": true,
+      "normalized": "Zoë Ångström"
+    },
+    {
+      "id": "signup-password-missing",
+      "form": "signup",
+      "field": "password",
+      "omit": true,
+      "valid": false,
+      "message": "Password is required"
+    },
+    {
+      "id": "signup-password-number",
+      "form": "signup",
+      "field": "password",
+      "input": 12345678,
+      "valid": false,
+      "message": "Password is required"
+    },
+    {
+      "id": "signup-password-empty",
+      "form": "signup",
+      "field": "password",
+      "input": "",
+      "valid": false,
+      "message": "Password is required"
+    },
+    {
+      "id": "signup-password-7",
+      "form": "signup",
+      "field": "password",
+      "input": "abc12!x",
+      "valid": false,
+      "message": "Password must be at least 8 characters",
+      "note": "7 characters"
+    },
+    {
+      "id": "signup-password-8",
+      "form": "signup",
+      "field": "password",
+      "input": "abc12!xy",
+      "valid": true,
+      "normalized": "abc12!xy",
+      "note": "8 characters"
+    },
+    {
+      "id": "signup-password-128",
+      "form": "signup",
+      "field": "password",
+      "input": "a1!xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid": true,
+      "normalized": "a1!xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "note": "128 characters"
+    },
+    {
+      "id": "signup-password-129",
+      "form": "signup",
+      "field": "password",
+      "input": "a1!xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx",
+      "valid": false,
+      "message": "Password must be at most 128 characters",
+      "note": "129 characters"
+    },
+    {
+      "id": "signup-password-no-letter",
+      "form": "signup",
+      "field": "password",
+      "input": "1234567!",
+      "valid": false,
+      "message": "Password must contain a letter"
+    },
+    {
+      "id": "signup-password-no-ascii-letter",
+      "form": "signup",
+      "field": "password",
+      "input": "ÉÉÉÉ1234",
+      "valid": false,
+      "message": "Password must contain a letter",
+      "note": "É is not A-Z/a-z; it counts as special, not as a letter"
+    },
+    {
+      "id": "signup-password-no-digit",
+      "form": "signup",
+      "field": "password",
+      "input": "abcdefg!",
+      "valid": false,
+      "message": "Password must contain a number"
+    },
+    {
+      "id": "signup-password-no-special",
+      "form": "signup",
+      "field": "password",
+      "input": "abcd1234",
+      "valid": false,
+      "message": "Password must contain a special character"
+    },
+    {
+      "id": "signup-password-space-not-special",
+      "form": "signup",
+      "field": "password",
+      "input": "abcd 1234",
+      "valid": false,
+      "message": "Password must contain a special character",
+      "note": "whitespace is allowed but never counts as special"
+    },
+    {
+      "id": "signup-password-accent-special",
+      "form": "signup",
+      "field": "password",
+      "input": "abcd1234é",
+      "valid": true,
+      "normalized": "abcd1234é",
+      "note": "non-ASCII letters count as special"
+    },
+    {
+      "id": "signup-password-not-trimmed",
+      "form": "signup",
+      "field": "password",
+      "input": " ab1!xy ",
+      "valid": true,
+      "normalized": " ab1!xy ",
+      "note": "8 characters only if not trimmed"
+    },
+    {
+      "id": "signup-password-nbsp-not-special",
+      "form": "signup",
+      "field": "password",
+      "input": "abcd1234 ",
+      "valid": false,
+      "message": "Password must contain a special character",
+      "note": "NBSP is whitespace, so it never counts as special"
+    },
+    {
+      "id": "signup-password-whitespace-only",
+      "form": "signup",
+      "field": "password",
+      "input": "        ",
+      "valid": false,
+      "message": "Password must contain a letter",
+      "note": "8 spaces: present (never trimmed) but no letter, digit or special"
+    },
+    {
+      "id": "signup-password-129-no-letter",
+      "form": "signup",
+      "field": "password",
+      "input": "1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1!1",
+      "valid": false,
+      "message": "Password must be at most 128 characters",
+      "note": "129 characters: max comes before the character rules"
+    },
+    {
+      "id": "signup-password-first-failure",
+      "form": "signup",
+      "field": "password",
+      "input": "abcdefgh",
+      "valid": false,
+      "message": "Password must contain a number",
+      "note": "number and special both fail; the number rule comes first"
+    },
+    {
+      "id": "signup-password-short-and-plain",
+      "form": "signup",
+      "field": "password",
+      "input": "abc",
+      "valid": false,
+      "message": "Password must be at least 8 characters",
+      "note": "length comes before the character rules"
+    },
+    {
+      "id": "signin-password-missing",
+      "form": "signin",
+      "field": "password",
+      "omit": true,
+      "valid": false,
+      "message": "Password is required"
+    },
+    {
+      "id": "signin-password-empty",
+      "form": "signin",
+      "field": "password",
+      "input": "",
+      "valid": false,
+      "message": "Password is required"
+    },
+    {
+      "id": "signin-password-1",
+      "form": "signin",
+      "field": "password",
+      "input": "x",
+      "valid": true,
+      "normalized": "x",
+      "note": "no complexity check on signin"
+    },
+    {
+      "id": "signin-password-plain",
+      "form": "signin",
+      "field": "password",
+      "input": "abcdefgh",
+      "valid": true,
+      "normalized": "abcdefgh"
+    },
+    {
+      "id": "signin-password-128",
+      "form": "signin",
+      "field": "password",
+      "input": "pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+      "valid": true,
+      "normalized": "pppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp"
+    },
+    {
+      "id": "signin-password-whitespace-only",
+      "form": "signin",
+      "field": "password",
+      "input": "        ",
+      "valid": true,
+      "normalized": "        ",
+      "note": "never trimmed; no complexity check on signin"
+    },
+    {
+      "id": "signin-password-129",
+      "form": "signin",
+      "field": "password",
+      "input": "ppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppppp",
+      "valid": false,
+      "message": "Password must be at most 128 characters"
+    },
+    {
+      "id": "signup-unknown-field",
+      "form": "signup",
+      "field": "role",
+      "apiOnly": true,
+      "input": "admin",
+      "valid": false,
+      "message": "Field is not allowed",
+      "note": "web forms send known fields only"
+    },
+    {
+      "id": "signin-unknown-field",
+      "form": "signin",
+      "field": "remember",
+      "apiOnly": true,
+      "input": true,
+      "valid": false,
+      "message": "Field is not allowed",
+      "note": "web forms send known fields only"
+    }
+  ]
+}

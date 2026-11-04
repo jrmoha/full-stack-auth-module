@@ -57,7 +57,7 @@ Supporting libraries that implement locked items (not new decisions): `@nestjs/c
 No other collections. No relationships.
 
 ### Validation rules (source of truth)
-Normalization runs before checks: email is trimmed and lowercased; name is trimmed; password is never trimmed. Web and API messages are identical text. Check order is the table order; the web shows the first failing message, the API returns every failing message for the field. Every rule has rows in `fixtures/validation-cases.json`, and both test suites run every row.
+Normalization runs before checks: email is trimmed and lowercased; name is trimmed; password is never trimmed. Web and API messages are identical text. Check order is the table order; the web shows the first failing message, the API returns every failing message for the field. A field is present only if it is a string that is not empty after normalization (so a blank or whitespace-only email or name, or an empty password, reads as required); a field that is not present reports only its required message. Lengths count UTF-16 code units (JavaScript `length`) on both sides. Whitespace means JavaScript's `\s` set, which is also what trimming removes (space, tab, newline, NBSP and the other Unicode spaces). Every rule has rows in `fixtures/validation-cases.json`, and both test suites run every row.
 
 | Field | Rule in plain words | Web (Zod) message | API (class-validator) message |
 |---|---|---|---|
