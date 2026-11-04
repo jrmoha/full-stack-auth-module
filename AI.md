@@ -212,3 +212,13 @@ Copy this block for each task, in roadmap order.
   - `pnpm lint`, `pnpm typecheck`, `prettier --check`, `pnpm test`. No reviewer (L).
 - Corrected or reworked: the AI's first origin check called `new URL()` inside a Zod refinement. Zod 4 still runs refinements after the URL check fails, so an invalid value threw a `TypeError` whose `input` printed the raw value in the build output and bypassed the names-only message. The refinement now catches and returns false; re-tested with sentinel values (not printed).
 - Differed from AI suggestion: none.
+
+
+### 2.1 Web Zod schemas with parity tests
+- Date / time spent: 2026-11-04, about 15 min (estimate 15)
+- AI-generated: `apps/web/src/lib/validation.ts` (`signupSchema`, `signinSchema` for React Hook Form; §4 messages; normalization; presence rule; the same email pattern as the API) and `apps/web/test/validation.spec.ts` (runs the 101 non-`apiOnly` rows of `fixtures/validation-cases.json`, asserting success and normalized values for valid rows, and for invalid rows that only that field fails with the §4 message first).
+- Rows that failed on the first AI draft and why: one, `signup-name-26-emoji`. The draft used Zod's `.min()`/`.max()`, which count code points, so 26 emoji (52 UTF-16 code units) passed the 50-character limit while the API rejects them. §4 says lengths are JavaScript `length` (added after the 1.3 review), so all web length checks now compare `length` directly. Without that fixture row the two sides would have disagreed silently.
+- Prompt or approach: rules mirrored from the API, not shared (architecture §3: the apps never import from each other); each field is a string with a required message for non-strings, normalized, then checked in §4 order so the first issue is the message the form shows.
+- Verified by: `pnpm --filter web test` (102 tests), `pnpm lint`, `pnpm typecheck`, `pnpm --filter web build`. No reviewer (L).
+- Corrected or reworked: the length fix above.
+- Differed from AI suggestion: none.
