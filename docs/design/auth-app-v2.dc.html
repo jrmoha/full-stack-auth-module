@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<!--
+  Reference copy of "Auth App v2.dc.html" from the Claude Design project "Auth App prototype design"
+  (https://claude.ai/design/p/f25d6d2d-b7a5-490b-b948-be60ee6a1bbc), imported 2026-11-04.
+  Visual reference only: it needs the design tool's support.js runtime to render, and its routing,
+  copy and validation are superseded by docs/architecture.md (see docs/design/README.md).
+-->
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;family=IBM+Plex+Sans+Arabic:wght@400;500;600;700&amp;display=swap">
+<script src="./image-slot.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f7f5f0;color:#14211d;font-family:'Plus Jakarta Sans','IBM Plex Sans Arabic',sans-serif}
+a{color:#1d5c4c;font-weight:700;text-decoration:none}
+a:hover{color:#14453a;text-decoration:underline}
+input::placeholder{color:#8a918d}
+input:focus{border-color:#1d5c4c !important;box-shadow:0 0 0 3px rgba(29,92,76,.14)}
+@keyframes spin{to{transform:rotate(360deg)}}
+</style>
+</helmet>
+
+<div dir="{{ dir }}" lang="{{ lang }}" style="min-height:100vh">
+
+<sc-if value="{{ isAuth }}" hint-placeholder-val="{{ true }}">
+<div data-screen-label="01 Sign in / Sign up" style="min-height:100vh;display:flex;flex-wrap:wrap;gap:16px;padding:16px;background:#fff">
+  <div style="flex:1 1 440px;min-width:0;display:flex;flex-direction:column;padding:12px 16px 24px">
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:12px">
+      <div style="display:flex;align-items:center;gap:9px">
+        <span style="display:flex;align-items:center;justify-content:center;width:32px;height:32px;border-radius:999px 999px 999px 4px;background:#1d5c4c;color:#f2c46d;font-size:15px;font-weight:800">W</span>
+        <span style="font-size:16px;font-weight:800;letter-spacing:-.01em">{{ t.brand }}</span>
+      </div>
+      <button type="button" onClick="{{ toggleLang }}" style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border:1px solid #e3e0d8;border-radius:999px;background:#fff;color:#14211d;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:#f7f5f0">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><line x1="3" y1="12" x2="21" y2="12"></line><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18Z"></path></svg>
+        <span>{{ t.langSwitch }}</span>
+      </button>
+    </div>
+
+    <div style="flex:1;display:flex;align-items:center;justify-content:center;padding:40px 0">
+      <form onSubmit="{{ onSubmit }}" noValidate="{{ true }}" style="width:100%;max-width:400px;display:flex;flex-direction:column;gap:16px">
+        <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:4px">
+          <h1 style="margin:0;font-size:28px;font-weight:800;line-height:1.2;letter-spacing:-.02em">{{ title }}</h1>
+          <p style="margin:0;font-size:14px;font-weight:500;line-height:1.5;color:#5b6460">{{ subtitle }}</p>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;padding:4px;border-radius:999px;background:#f1eee6">
+          <button type="button" onClick="{{ toSignin }}" style="{{ tabSigninStyle }}">{{ t.signin }}</button>
+          <button type="button" onClick="{{ toSignup }}" style="{{ tabSignupStyle }}">{{ t.signup }}</button>
+        </div>
+
+        <sc-if value="{{ authError }}">
+          <div role="alert" style="display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-radius:10px;background:#fbeeec;color:#b0322a;font-size:13px;font-weight:700;line-height:1.45">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" style="flex:none;margin-top:1px"><circle cx="12" cy="12" r="9"></circle><line x1="12" y1="7.5" x2="12" y2="13"></line><line x1="12" y1="16.3" x2="12" y2="16.5"></line></svg>
+            <span>{{ authError }}</span>
+          </div>
+        </sc-if>
+
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:13px;font-weight:700">{{ t.email }}</span>
+          <input type="email" dir="ltr" autoComplete="email" placeholder="name@company.com" value="{{ email }}" onChange="{{ onEmail }}" onBlur="{{ blurEmail }}" style="{{ emailInputStyle }}">
+          <sc-if value="{{ emailErr }}"><span style="font-size:12px;font-weight:600;color:#b0322a">{{ emailErr }}</span></sc-if>
+        </label>
+
+        <sc-if value="{{ isSignup }}">
+          <label style="display:flex;flex-direction:column;gap:7px">
+            <span style="font-size:13px;font-weight:700">{{ t.name }}</span>
+            <input type="text" autoComplete="name" placeholder="{{ t.namePh }}" value="{{ name }}" onChange="{{ onName }}" onBlur="{{ blurName }}" style="{{ nameInputStyle }}">
+            <sc-if value="{{ nameErr }}"><span style="font-size:12px;font-weight:600;color:#b0322a">{{ nameErr }}</span></sc-if>
+          </label>
+        </sc-if>
+
+        <label style="display:flex;flex-direction:column;gap:7px">
+          <span style="font-size:13px;font-weight:700">{{ t.password }}</span>
+          <span style="position:relative;display:flex">
+            <input type="{{ pwType }}" autoComplete="{{ pwAutocomplete }}" placeholder="{{ pwPlaceholder }}" value="{{ password }}" onChange="{{ onPassword }}" onBlur="{{ blurPassword }}" style="{{ pwInputStyle }}">
+            <button type="button" onClick="{{ togglePw }}" aria-label="{{ pwToggleLabel }}" style="position:absolute;inset-inline-end:6px;top:50%;transform:translateY(-50%);height:32px;padding:0 10px;border:0;border-radius:8px;background:transparent;color:#1d5c4c;font:inherit;font-size:12px;font-weight:700;cursor:pointer" style-hover="background:#eef4f1">{{ pwToggleLabel }}</button>
+          </span>
+          <sc-if value="{{ pwErr }}"><span style="font-size:12px;font-weight:600;color:#b0322a">{{ pwErr }}</span></sc-if>
+        </label>
+
+        <sc-if value="{{ showRules }}">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px 12px">
+            <sc-for list="{{ rules }}" as="r" hint-placeholder-count="4">
+              <span style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:600;line-height:1.3">
+                <sc-if value="{{ r.ok }}">
+                  <span style="display:flex;align-items:center;justify-content:center;flex:none;width:16px;height:16px;border-radius:999px;background:#1d5c4c;color:#fff"><svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+                  <span style="color:#14453a">{{ r.label }}</span>
+                </sc-if>
+                <sc-if value="{{ r.no }}">
+                  <span style="flex:none;width:16px;height:16px;border-radius:999px;border:1.5px solid #d6d2c7"></span>
+                  <span style="color:#5b6460">{{ r.label }}</span>
+                </sc-if>
+              </span>
+            </sc-for>
+          </div>
+        </sc-if>
+
+        <button type="submit" disabled="{{ submitting }}" style="display:flex;align-items:center;justify-content:center;gap:8px;height:48px;margin-top:6px;border:0;border-radius:999px;background:#1d5c4c;color:#fff;font:inherit;font-size:14.5px;font-weight:700;cursor:pointer" style-hover="background:#14453a">
+          <sc-if value="{{ submitting }}"><span style="width:14px;height:14px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:999px;animation:spin .7s linear infinite"></span></sc-if>
+          <span>{{ submitLabel }}</span>
+        </button>
+
+        <p style="margin:6px 0 0;padding-top:16px;border-top:1px solid #ece9e1;font-size:13px;font-weight:500;color:#5b6460;text-align:center">
+          <span>{{ switchPrompt }} </span><a href="#" onClick="{{ switchMode }}">{{ switchLink }}</a>
+        </p>
+      </form>
+    </div>
+  </div>
+
+  <aside style="flex:1 1 480px;min-height:560px;position:relative;display:flex;flex-direction:column;gap:28px;padding:48px 44px 0;border-radius:24px;background:#173f35;color:#f7f1e3;overflow:hidden">
+    <div style="display:flex;flex-direction:column;gap:12px;max-width:460px">
+      <span style="align-self:flex-start;height:26px;display:inline-flex;align-items:center;padding:0 11px;border-radius:999px;background:#f2c46d;color:#173f35;font-size:11.5px;font-weight:800;letter-spacing:.04em">{{ t.heroTag }}</span>
+      <h2 style="margin:0;font-size:34px;font-weight:800;line-height:1.15;letter-spacing:-.02em;text-wrap:pretty">{{ t.heroTitle }}</h2>
+      <p style="margin:0;font-size:15px;font-weight:500;line-height:1.55;color:#c9d8d1;text-wrap:pretty">{{ t.heroBody }}</p>
+    </div>
+    <div aria-hidden="true" style="flex:1;min-height:340px;position:relative;margin-inline-end:-44px">
+      <div style="position:absolute;inset:0;display:flex;flex-direction:column;border-start-start-radius:18px;background:#f7f5f0;color:#14211d;box-shadow:0 30px 60px -20px rgba(0,0,0,.45);overflow:hidden">
+        <div style="display:flex;align-items:center;gap:12px;padding:12px 18px;background:#fff;border-bottom:1px solid #ece9e1">
+          <span style="display:flex;gap:6px"><span style="width:9px;height:9px;border-radius:999px;background:#e3e0d8"></span><span style="width:9px;height:9px;border-radius:999px;background:#e3e0d8"></span><span style="width:9px;height:9px;border-radius:999px;background:#e3e0d8"></span></span>
+          <span style="display:flex;align-items:center;gap:7px;margin-inline-start:8px">
+            <span style="display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:999px 999px 999px 3px;background:#1d5c4c;color:#f2c46d;font-size:10px;font-weight:800">W</span>
+            <span style="font-size:12px;font-weight:800">{{ t.brand }}</span>
+          </span>
+          <span style="margin-inline-start:auto;height:24px;display:inline-flex;align-items:center;padding:0 10px;border-radius:999px;background:#1d5c4c;color:#fff;font-size:10.5px;font-weight:700">{{ t.logout }}</span>
+        </div>
+        <div style="display:flex;flex:1;min-height:0">
+          <div style="width:120px;flex:none;display:flex;flex-direction:column;gap:10px;padding:18px 14px;border-inline-end:1px solid #ece9e1;background:#fff">
+            <span style="height:22px;border-radius:7px;background:#eef4f1"></span>
+            <span style="height:8px;width:70%;border-radius:999px;background:#ece9e1"></span>
+            <span style="height:8px;width:85%;border-radius:999px;background:#ece9e1"></span>
+            <span style="height:8px;width:60%;border-radius:999px;background:#ece9e1"></span>
+          </div>
+          <div style="flex:1;min-width:0;display:flex;flex-direction:column;gap:14px;padding:22px">
+            <div style="display:flex;flex-direction:column;gap:4px">
+              <span style="font-size:11px;font-weight:600;color:#5b6460">{{ mockGreeting }}</span>
+              <span style="font-size:18px;font-weight:800;letter-spacing:-.01em">{{ t.welcome }}</span>
+            </div>
+            <div style="border:1px solid #ece9e1;border-radius:14px;background:#fff;overflow:hidden">
+              <div style="display:flex;align-items:center;gap:10px;padding:12px 14px;background:#173f35;color:#f7f1e3">
+                <span style="display:flex;align-items:center;justify-content:center;flex:none;width:34px;height:34px;border-radius:999px;background:#f2c46d;color:#173f35;font-size:12px;font-weight:800">DL</span>
+                <span style="display:flex;flex-direction:column;gap:2px;min-width:0">
+                  <span style="font-size:12.5px;font-weight:800">Dana Levi</span>
+                  <span dir="ltr" style="font-size:10.5px;color:#c9d8d1;text-align:start">dana@company.com</span>
+                </span>
+              </div>
+              <div style="display:grid;grid-template-columns:1fr 1fr">
+                <span style="display:flex;flex-direction:column;gap:3px;padding:10px 14px;border-bottom:1px solid #f1eee6"><span style="font-size:9.5px;font-weight:600;color:#8a918d">{{ t.dId }}</span><span style="font-size:11px;font-weight:700">6650f1c2a9e4</span></span>
+                <span style="display:flex;flex-direction:column;gap:3px;padding:10px 14px;border-bottom:1px solid #f1eee6"><span style="font-size:9.5px;font-weight:600;color:#8a918d">{{ t.dSession }}</span><span style="font-size:11px;font-weight:700">{{ t.active }}</span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div style="position:absolute;bottom:36px;inset-inline-start:-22px;display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:14px;background:#14211d;color:#f7f1e3;box-shadow:0 16px 36px -12px rgba(0,0,0,.55)">
+        <span style="display:flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:999px;background:#f2c46d;color:#14211d"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+        <span style="font-size:12px;font-weight:700">{{ t.toastIn }}</span>
+      </div>
+    </div>
+  </aside>
+</div>
+</sc-if>
+
+<sc-if value="{{ isApp }}">
+<div data-screen-label="02 Application" style="min-height:100vh;display:flex;flex-direction:column;background:#f7f5f0">
+  <header style="display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 28px;background:#fff;border-bottom:1px solid #ece9e1">
+    <div style="display:flex;align-items:center;gap:9px">
+      <span style="display:flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:999px 999px 999px 4px;background:#1d5c4c;color:#f2c46d;font-size:14px;font-weight:800">W</span>
+      <span style="font-size:15px;font-weight:800">{{ t.brand }}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button type="button" onClick="{{ toggleLang }}" style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 12px;border:1px solid #e3e0d8;border-radius:999px;background:#fff;color:#14211d;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:#f7f5f0">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"></circle><line x1="3" y1="12" x2="21" y2="12"></line><path d="M12 3a14 14 0 0 1 0 18a14 14 0 0 1 0-18Z"></path></svg>
+        <span>{{ t.langSwitch }}</span>
+      </button>
+      <button onClick="{{ logout }}" style="display:inline-flex;align-items:center;gap:7px;height:34px;padding:0 14px;border:0;border-radius:999px;background:#1d5c4c;color:#fff;font:inherit;font-size:12.5px;font-weight:700;cursor:pointer" style-hover="background:#14453a">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="{{ logoutIconStyle }}"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+        <span>{{ t.logout }}</span>
+      </button>
+    </div>
+  </header>
+
+  <main style="flex:1;width:100%;max-width:760px;margin:0 auto;padding:48px 20px;display:flex;flex-direction:column;gap:24px">
+    <div style="display:flex;flex-direction:column;gap:8px">
+      <p style="margin:0;font-size:14px;font-weight:600;color:#5b6460">{{ greeting }}</p>
+      <h1 style="margin:0;font-size:32px;font-weight:800;line-height:1.2;letter-spacing:-.02em;text-wrap:pretty">{{ t.welcome }}</h1>
+    </div>
+
+    <section style="background:#fff;border:1px solid #ece9e1;border-radius:20px;overflow:hidden">
+      <div style="display:flex;align-items:center;gap:16px;padding:22px 24px;background:#173f35;color:#f7f1e3">
+        <span style="display:flex;align-items:center;justify-content:center;flex:none;width:56px;height:56px;border-radius:999px;background:#f2c46d;color:#173f35;font-size:18px;font-weight:800">{{ initials }}</span>
+        <div style="min-width:0;display:flex;flex-direction:column;gap:3px">
+          <span style="font-size:18px;font-weight:800;overflow-wrap:anywhere">{{ userName }}</span>
+          <span dir="ltr" style="font-size:13px;font-weight:500;color:#c9d8d1;overflow-wrap:anywhere;text-align:start">{{ userEmail }}</span>
+        </div>
+        <span style="margin-inline-start:auto;flex:none;display:inline-flex;align-items:center;gap:6px;height:26px;padding:0 10px;border-radius:999px;background:rgba(247,241,227,.12);color:#f7f1e3;font-size:11.5px;font-weight:700">
+          <span style="width:7px;height:7px;border-radius:999px;background:#7fd1a8"></span>{{ t.signedIn }}
+        </span>
+      </div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr))">
+        <sc-for list="{{ details }}" as="d" hint-placeholder-count="6">
+          <div style="display:flex;flex-direction:column;gap:5px;padding:16px 24px;border-bottom:1px solid #f1eee6">
+            <span style="font-size:12px;font-weight:600;color:#8a918d">{{ d.label }}</span>
+            <span style="font-size:14px;font-weight:700;overflow-wrap:anywhere;font-variant-numeric:tabular-nums">{{ d.value }}</span>
+          </div>
+        </sc-for>
+      </div>
+    </section>
+  </main>
+</div>
+</sc-if>
+
+<sc-if value="{{ toast }}">
+  <div role="status" style="position:fixed;top:20px;inset-inline-end:20px;width:min(340px,calc(100vw - 40px));display:flex;align-items:center;gap:10px;padding:12px 14px;border-radius:14px;background:#14211d;color:#f7f1e3;box-shadow:0 16px 36px -14px rgba(20,33,29,.5)">
+    <span style="display:flex;flex:none;align-items:center;justify-content:center;width:26px;height:26px;border-radius:999px;background:#f2c46d;color:#14211d"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg></span>
+    <span style="flex:1;font-size:13px;font-weight:600;line-height:1.45">{{ toast }}</span>
+    <button onClick="{{ closeToast }}" aria-label="Close" style="flex:none;padding:4px;border:0;background:transparent;color:#8a918d;cursor:pointer;line-height:0"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="6" y1="6" x2="18" y2="18"></line><line x1="18" y1="6" x2="6" y2="18"></line></svg></button>
+  </div>
+</sc-if>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;startPage&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;Sign in&quot;,&quot;Sign up&quot;,&quot;Application&quot;],&quot;default&quot;:&quot;Sign in&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;language&quot;:{&quot;editor&quot;:&quot;enum&quot;,&quot;options&quot;:[&quot;English&quot;,&quot;Arabic&quot;],&quot;default&quot;:&quot;English&quot;,&quot;tsType&quot;:&quot;string&quot;},&quot;liveRules&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;}}">
+const STR = {
+  en: {
+    brand: 'Workspace', langSwitch: 'عربي',
+    signin: 'Sign in', signup: 'Sign up',
+    titleIn: 'Welcome back', subIn: 'Sign in to continue to your workspace.',
+    titleUp: 'Create your account', subUp: 'Sign up with your email to get started.',
+    email: 'Email address', name: 'Full name', namePh: 'Your full name', password: 'Password',
+    pwPhIn: 'Enter your password', pwPhUp: 'Create a password', show: 'Show', hide: 'Hide',
+    r1: '8+ characters', r2: 'One letter', r3: 'One number', r4: 'One special character',
+    eEmailReq: 'Email is required', eEmail: 'Enter a valid email address', eName: 'Name must be at least 3 characters',
+    ePwReq: 'Password is required', ePw: 'Password doesn’t meet all requirements', eAuth: 'Incorrect email or password.',
+    btnIn: 'Sign in', btnUp: 'Create account', busyIn: 'Signing in…', busyUp: 'Creating account…',
+    promptIn: 'New here?', linkIn: 'Create an account', promptUp: 'Already have an account?', linkUp: 'Sign in',
+    heroTag: 'WORKSPACE', heroTitle: 'One account for everything your team works on.', heroBody: 'Sign in once and pick up exactly where you left off, on any device.',
+    welcome: 'Welcome to the application.', hi: 'Hi, ', signedIn: 'Signed in', logout: 'Log out',
+    dName: 'Full name', dEmail: 'Email', dId: 'User ID', dSince: 'Member since', dAt: 'Signed in at', dSession: 'Session', active: 'Active',
+    toastIn: 'Signed in successfully', toastUp: 'Account created. You’re signed in.', locale: 'en-US',
+  },
+  ar: {
+    brand: 'Workspace', langSwitch: 'EN',
+    signin: 'تسجيل الدخول', signup: 'إنشاء حساب',
+    titleIn: 'مرحبًا بعودتك', subIn: 'سجّل الدخول للمتابعة إلى مساحة عملك.',
+    titleUp: 'أنشئ حسابك', subUp: 'سجّل باستخدام بريدك الإلكتروني للبدء.',
+    email: 'البريد الإلكتروني', name: 'الاسم الكامل', namePh: 'اسمك الكامل', password: 'كلمة المرور',
+    pwPhIn: 'أدخل كلمة المرور', pwPhUp: 'أنشئ كلمة مرور', show: 'إظهار', hide: 'إخفاء',
+    r1: '8 أحرف على الأقل', r2: 'حرف واحد', r3: 'رقم واحد', r4: 'رمز خاص واحد',
+    eEmailReq: 'البريد الإلكتروني مطلوب', eEmail: 'أدخل بريدًا إلكترونيًا صالحًا', eName: 'يجب أن يتكون الاسم من 3 أحرف على الأقل',
+    ePwReq: 'كلمة المرور مطلوبة', ePw: 'كلمة المرور لا تستوفي جميع المتطلبات', eAuth: 'البريد الإلكتروني أو كلمة المرور غير صحيحة.',
+    btnIn: 'تسجيل الدخول', btnUp: 'إنشاء الحساب', busyIn: 'جارٍ تسجيل الدخول…', busyUp: 'جارٍ إنشاء الحساب…',
+    promptIn: 'جديد هنا؟', linkIn: 'أنشئ حسابًا', promptUp: 'لديك حساب بالفعل؟', linkUp: 'سجّل الدخول',
+    heroTag: 'WORKSPACE', heroTitle: 'حساب واحد لكل ما يعمل عليه فريقك.', heroBody: 'سجّل الدخول مرة واحدة وتابع من حيث توقفت، على أي جهاز.',
+    welcome: 'مرحبًا بك في التطبيق.', hi: 'أهلًا، ', signedIn: 'متصل', logout: 'تسجيل الخروج',
+    dName: 'الاسم الكامل', dEmail: 'البريد الإلكتروني', dId: 'معرّف المستخدم', dSince: 'عضو منذ', dAt: 'وقت تسجيل الدخول', dSession: 'الجلسة', active: 'نشطة',
+    toastIn: 'تم تسجيل الدخول بنجاح', toastUp: 'تم إنشاء الحساب وتسجيل دخولك.', locale: 'ar-u-nu-latn',
+  },
+};
+const DEMO = () => ({ name: 'Dana Levi', email: 'dana@company.com', id: '6650f1c2a9e4', created: new Date() });
+
+class Component extends DCLogic {
+  state = {
+    lang: this.props.language === 'Arabic' ? 'ar' : 'en',
+    page: this.props.startPage === 'Application' ? 'app' : 'auth',
+    mode: this.props.startPage === 'Sign up' ? 'signup' : 'signin',
+    email: '', name: '', password: '', showPw: false,
+    touched: {}, submitted: false, submitting: false, authError: false, toast: '',
+    user: this.props.startPage === 'Application' ? DEMO() : null,
+  };
+  componentDidUpdate(prev) {
+    const p = this.props.startPage;
+    if (prev.startPage !== p) this.setState({ page: p === 'Application' ? 'app' : 'auth', mode: p === 'Sign up' ? 'signup' : 'signin', user: p === 'Application' ? DEMO() : this.state.user });
+    if (prev.language !== this.props.language) this.setState({ lang: this.props.language === 'Arabic' ? 'ar' : 'en' });
+  }
+  componentWillUnmount() { clearTimeout(this.t); clearTimeout(this.s); }
+  rules(t) {
+    const p = this.state.password;
+    return [
+      { label: t.r1, ok: p.length >= 8 },
+      { label: t.r2, ok: /\p{L}/u.test(p) },
+      { label: t.r3, ok: /\d/.test(p) },
+      { label: t.r4, ok: /[^\p{L}\d\s]/u.test(p) },
+    ].map(r => ({ ...r, no: !r.ok }));
+  }
+  validate(t) {
+    const { email, name, password, mode } = this.state;
+    const e = {};
+    if (!email.trim()) e.email = t.eEmailReq;
+    else if (!/^[^\s@]+@[^\s@]+\.[^\s@]{2,}$/.test(email.trim())) e.email = t.eEmail;
+    if (mode === 'signup') {
+      if (name.trim().length < 3) e.name = t.eName;
+      if (!password) e.password = t.ePwReq;
+      else if (this.rules(t).some(x => !x.ok)) e.password = t.ePw;
+    } else if (!password) e.password = t.ePwReq;
+    return e;
+  }
+  inputStyle(err, pad) {
+    return { width: '100%', height: 48, paddingInline: pad ? '14px 72px' : '14px', border: '1px solid ' + (err ? '#d0574c' : '#e3e0d8'), borderRadius: 12, background: err ? '#fdf6f5' : '#fff', color: '#14211d', font: 'inherit', fontSize: 14, fontWeight: 500, outline: 'none', transition: 'border-color .15s, box-shadow .15s' };
+  }
+  tab(active) {
+    return { height: 36, border: 0, borderRadius: 999, font: 'inherit', fontSize: 13, fontWeight: 700, cursor: 'pointer', background: active ? '#fff' : 'transparent', color: active ? '#14211d' : '#5b6460', boxShadow: active ? '0 2px 8px -3px rgba(20,33,29,.25)' : 'none' };
+  }
+  setMode(mode) { this.setState({ mode, touched: {}, submitted: false, authError: false, password: '' }); }
+  submit = (ev) => {
+    ev.preventDefault();
+    const t = STR[this.state.lang];
+    this.setState({ submitted: true, authError: false });
+    if (Object.keys(this.validate(t)).length) return;
+    this.setState({ submitting: true });
+    this.s = setTimeout(() => {
+      const { email, name, mode, password } = this.state;
+      if (mode === 'signin' && password === 'wrong') return this.setState({ submitting: false, authError: true });
+      const fallback = email.split('@')[0].replace(/[._-]+/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+      this.setState({
+        submitting: false, page: 'app', password: '',
+        user: { name: mode === 'signup' ? name.trim() : fallback, email: email.trim(), id: Math.random().toString(16).slice(2, 14), created: new Date() },
+        toast: mode === 'signup' ? 'up' : 'in',
+      });
+      clearTimeout(this.t); this.t = setTimeout(() => this.setState({ toast: '' }), 4000);
+    }, 900);
+  };
+  renderVals() {
+    const s = this.state, t = STR[s.lang], up = s.mode === 'signup';
+    const errs = this.validate(t);
+    const show = k => (s.submitted || s.touched[k]) ? errs[k] : '';
+    const touch = k => () => this.setState(st => ({ touched: { ...st.touched, [k]: true } }));
+    const u = s.user || { name: '', email: '', id: '', created: new Date() };
+    const initials = u.name.split(/\s+/).filter(Boolean).slice(0, 2).map(w => w[0].toUpperCase()).join('');
+    return {
+      t, dir: s.lang === 'ar' ? 'rtl' : 'ltr', lang: s.lang,
+      toggleLang: () => this.setState({ lang: s.lang === 'ar' ? 'en' : 'ar' }),
+      isAuth: s.page === 'auth', isApp: s.page === 'app', isSignup: up,
+      title: up ? t.titleUp : t.titleIn, subtitle: up ? t.subUp : t.subIn,
+      tabSigninStyle: this.tab(!up), tabSignupStyle: this.tab(up),
+      toSignin: () => this.setMode('signin'), toSignup: () => this.setMode('signup'),
+      switchMode: e => { e.preventDefault(); this.setMode(up ? 'signin' : 'signup'); },
+      switchPrompt: up ? t.promptUp : t.promptIn, switchLink: up ? t.linkUp : t.linkIn,
+      email: s.email, name: s.name, password: s.password,
+      onEmail: e => this.setState({ email: e.target.value, authError: false }),
+      onName: e => this.setState({ name: e.target.value }),
+      onPassword: e => this.setState({ password: e.target.value, authError: false }),
+      blurEmail: touch('email'), blurName: touch('name'), blurPassword: touch('password'),
+      emailErr: show('email'), nameErr: show('name'), pwErr: show('password'),
+      emailInputStyle: this.inputStyle(show('email')), nameInputStyle: this.inputStyle(show('name')), pwInputStyle: this.inputStyle(show('password'), true),
+      pwType: s.showPw ? 'text' : 'password', pwToggleLabel: s.showPw ? t.hide : t.show,
+      togglePw: () => this.setState({ showPw: !s.showPw }),
+      pwAutocomplete: up ? 'new-password' : 'current-password', pwPlaceholder: up ? t.pwPhUp : t.pwPhIn,
+      showRules: up && ((this.props.liveRules ?? true) || s.submitted), rules: this.rules(t),
+      authError: s.authError ? t.eAuth : '', submitting: s.submitting, onSubmit: this.submit,
+      submitLabel: s.submitting ? (up ? t.busyUp : t.busyIn) : (up ? t.btnUp : t.btnIn),
+      initials, userName: u.name, userEmail: u.email,
+      greeting: t.hi + (u.name.split(' ')[0] || ''),
+      mockGreeting: t.hi + 'Dana',
+      logoutIconStyle: { transform: s.lang === 'ar' ? 'scaleX(-1)' : 'none' },
+      details: [
+        { label: t.dName, value: u.name },
+        { label: t.dEmail, value: u.email },
+        { label: t.dId, value: u.id },
+        { label: t.dSince, value: u.created.toLocaleDateString(t.locale, { month: 'short', day: 'numeric', year: 'numeric' }) },
+        { label: t.dAt, value: new Date().toLocaleTimeString(t.locale, { hour: '2-digit', minute: '2-digit' }) },
+        { label: t.dSession, value: t.active },
+      ],
+      logout: () => { clearTimeout(this.t); this.setState({ page: 'auth', mode: 'signin', user: null, email: '', name: '', password: '', touched: {}, submitted: false, toast: '' }); },
+      toast: s.toast ? (s.toast === 'up' ? t.toastUp : t.toastIn) : '', closeToast: () => this.setState({ toast: '' }),
+    };
+  }
+}
+</script>
+</body>
+</html>

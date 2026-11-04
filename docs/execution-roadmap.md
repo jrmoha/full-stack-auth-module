@@ -179,8 +179,11 @@ Estimates are wall-clock minutes for one governed loop. Tasks marked "no reviewe
 
 **Definition of done:** in a real browser a user can sign up, land on `/app` showing "Welcome to the application.", log out, and sign in again; `pnpm --filter web test` is green; no console errors on any route.
 
+Visual reference: [`docs/design/`](design/README.md) (Auth App v2). It governs look and layout only; routes, copy and validation follow the architecture.
+
 | # | Task | Status | Depends on | Runs via | Gate | Notes |
 |---|---|---|---|---|---|---|
+| 2.0 | Design reference and theme | ✅ | 0.2 | main session | — | Design copy in `docs/design/`, theme tokens and font. No reviewer (L) |
 | 2.1 | Web Zod schemas with parity tests | ⬜ | 1.3 | main session | — | Parallel with 1.2 onward. No reviewer (L) |
 | 2.2 | API client, session helper and app shell | ⬜ | 0.4, 0.5 | researcher → main session | — | Async cookies, no-store fetch, redirects |
 | 2.3 | `/app` page and logout button | ⬜ | 2.2, 1.7 | main session | — | Playwright MCP check. No reviewer (L) |
@@ -213,7 +216,7 @@ Estimates are wall-clock minutes for one governed loop. Tasks marked "no reviewe
 - Goal: the protected page and a client leaf logout button.
 - Scope in: `apps/web/src/app/app/page.tsx`, `apps/web/src/components/logout-button.tsx`.
 - Scope out: forms.
-- Expected output: authenticated users see exactly "Welcome to the application." and a logout button; anonymous users are redirected to `/signin`; logout returns to `/signin` and `/app` then redirects.
+- Expected output: authenticated users see the "Welcome to the application." heading, a profile card with their name, email, id and member-since date (design reference), and a logout button; anonymous users are redirected to `/signin`; logout returns to `/signin` and `/app` then redirects.
 - Validation: Playwright MCP creates a session with an in-page fetch to `/api/auth/signup`, loads `/app`, logs out, reloads `/app`; button disabled while pending; keyboard reachable; no console errors.
 - AI.md entry: whether the AI put `'use client'` on the page, and how it was moved to the leaf.
 - Rollback: revert.

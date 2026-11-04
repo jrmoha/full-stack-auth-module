@@ -1,1 +1,50 @@
 @import 'tailwindcss';
+
+/* Auth App v2 theme (docs/design/README.md). Colour tokens become utilities such as bg-brand, text-ink-muted. */
+@theme {
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+
+  --color-brand: #1d5c4c;
+  --color-brand-strong: #14453a;
+  --color-brand-deep: #173f35;
+  --color-brand-tint: #eef4f1;
+  --color-accent: #f2c46d;
+
+  --color-ink: #14211d;
+  --color-ink-muted: #5b6460;
+  --color-ink-subtle: #8a918d;
+  --color-on-deep: #f7f1e3;
+  --color-on-deep-muted: #c9d8d1;
+
+  --color-canvas: #f7f5f0;
+  --color-surface: #ffffff;
+  --color-line: #e3e0d8;
+  --color-line-soft: #ece9e1;
+  --color-line-faint: #f1eee6;
+  --color-rule-off: #d6d2c7;
+
+  --color-danger: #b0322a;
+  --color-danger-line: #d0574c;
+  --color-danger-tint: #fbeeec;
+  --color-danger-field: #fdf6f5;
+  --color-success: #7fd1a8;
+}
+
+/* Brand mark: rounded on three corners, nearly square bottom-left. */
+@utility brand-mark {
+  border-radius: 9999px 9999px 9999px 4px;
+}
+
+@layer base {
+  body {
+    @apply bg-canvas text-ink font-sans antialiased;
+  }
+
+  a {
+    @apply text-brand font-bold no-underline hover:text-brand-strong hover:underline;
+  }
+
+  input::placeholder {
+    @apply text-ink-subtle;
+  }
+}

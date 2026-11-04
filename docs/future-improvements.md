@@ -24,6 +24,8 @@
 | Exported OpenAPI spec as a CI artifact | An external consumer needs API docs in production |
 | Per-worker test databases | Test suite time becomes a bottleneck |
 | Unicode-aware email normalization | Internationalized email addresses must be supported |
+| Arabic/RTL language toggle (designed in `docs/design/`) | A second language is required; needs localised §4 and §8 messages on both web and API |
+| Post-sign-in confirmation toast (designed in `docs/design/`) | Product wants sign-in feedback beyond landing on `/app`; needs a one-shot flag across the server redirect |
 
 ## Next steps
 1. Dockerfiles for both apps and a compose profile that runs the full stack.
