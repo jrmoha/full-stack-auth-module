@@ -10,6 +10,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import type { Request, Response } from 'express';
+import { ClientIpThrottlerGuard } from '../common/throttle/client-ip-throttler.guard.js';
 import type { PublicUser } from '../users/public-user.js';
 import { AuthService } from './auth.service.js';
 import { clearAuthCookie, setAuthCookie } from './cookie.js';
@@ -24,6 +25,7 @@ export class AuthController {
 
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
+  @UseGuards(ClientIpThrottlerGuard)
   async signup(
     @Body() dto: SignupDto,
     @Res({ passthrough: true }) res: Response,
@@ -35,6 +37,7 @@ export class AuthController {
 
   @Post('signin')
   @HttpCode(HttpStatus.OK)
+  @UseGuards(ClientIpThrottlerGuard)
   async signin(
     @Body() dto: SigninDto,
     @Res({ passthrough: true }) res: Response,

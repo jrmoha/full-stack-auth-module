@@ -189,3 +189,13 @@ Copy this block for each task, in roadmap order.
 - Verified by: `pnpm test` (283 tests), `pnpm lint`, `pnpm typecheck`, `pnpm build`. No reviewer (L).
 - Corrected or reworked: none.
 - Differed from AI suggestion: none.
+
+
+### 1.8 Rate limiting on signup and signin
+- Date / time spent: 2026-11-04, about 20 min (estimate 20)
+- AI-generated: `ThrottlerModule.forRootAsync` in `AppModule` (one unnamed throttler, limit and window from config, in-memory store); `common/throttle/client-ip-throttler.guard.ts` on signup and signin only; `test/auth/throttle.spec.ts` (6 tests with a limit of 3); a high test default for `THROTTLE_AUTH_LIMIT` so other suites are not throttled; §10 now says the limit is per route and IPv6 is grouped by /64.
+- Researcher findings on the throttler's options (from the up-front 1.1 research pass): named throttlers send `Retry-After-<name>`, so the throttler is unnamed to send the plain `Retry-After` §4 requires; ttl is in milliseconds; the guard can be bound per route without `APP_GUARD`; the default tracker is `req.ip` with IPv6 masked to /64 since 6.7.0.
+- The proxy-IP keying risk and how the test proves it fixed: behind the Next.js proxy every request comes from the proxy, so keying on the socket address would throttle all users together, and trusting every forwarded entry would let a client pick its own key. Express trusts exactly `TRUST_PROXY_HOPS` (1) hops, so the key is the entry the proxy appended. Tests: two different forwarded IPs are limited independently, and a spoofed left-most `X-Forwarded-For` entry does not change the key; `/auth/me` and logout stay unthrottled past the limit.
+- Verified by: `pnpm test` (289 tests), `pnpm lint`, `pnpm typecheck`, `pnpm build`. M1 end-to-end against the dev database with curl on port 4100: signup 201 with the cookie, `/auth/me` 200, logout 204, `/auth/me` 401, signin with an uppercased email 200, wrong password 401 "Invalid email or password", duplicate 409, bad body 400 with field errors, the 11th signin within 60 s 429 with `Retry-After: 60`; the log had 20 request lines and none of the password, cookie, token, email or hash. Reviewer: `code-reviewer`, verdict FLAG; fixed below.
+- Corrected or reworked: the AI's tracker override returned the raw `req.ip`, which dropped the library's IPv6 /64 grouping, so one IPv6 client could rotate addresses for fresh buckets and defeat the signin limit. The guard now delegates to the library's tracker, and a test shows addresses in one /64 share a bucket while another /64 does not.
+- Differed from AI suggestion: none.

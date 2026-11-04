@@ -91,7 +91,7 @@ Estimates are wall-clock minutes for one governed loop. Tasks marked "no reviewe
 | 1.5 | `POST /auth/signin` | ✅ | 1.4 | main session | — | Generic 401, dummy verify |
 | 1.6 | JWT guard and `GET /auth/me` | ✅ | 1.5 | researcher → main session | — | passport-jwt cookie extraction |
 | 1.7 | `POST /auth/logout` | ✅ | 1.6 | main session | — | Idempotent 204. No reviewer (L) |
-| 1.8 | Rate limiting on signup and signin | ⬜ | 1.7 | researcher → main session | — | Throttler current API, trusted proxy |
+| 1.8 | Rate limiting on signup and signin | ✅ | 1.7 | researcher → main session | — | Throttler current API, trusted proxy |
 
 ### Task specs
 

@@ -2,6 +2,7 @@ import { join } from 'node:path';
 import { Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { ThrottlerModule } from '@nestjs/throttler';
 import { MongooseError } from 'mongoose';
 import { AuthModule } from './auth/auth.module.js';
 import { LoggingModule } from './common/logging/logger.module.js';
@@ -21,6 +22,19 @@ const MONGO_SERVER_SELECTION_TIMEOUT_MS = 5000;
       validate: validateEnv,
     }),
     LoggingModule,
+    // In-memory store, one unnamed throttler so the 429 carries a plain Retry-After header (architecture §10).
+    // Applied only where a route uses ClientIpThrottlerGuard (signup, signin).
+    ThrottlerModule.forRootAsync({
+      inject: [ConfigService],
+      useFactory: (config: ConfigService<Env, true>) => ({
+        throttlers: [
+          {
+            ttl: config.get('THROTTLE_AUTH_TTL_SECONDS', { infer: true }) * 1000,
+            limit: config.get('THROTTLE_AUTH_LIMIT', { infer: true }),
+          },
+        ],
+      }),
+    }),
     MongooseModule.forRootAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<Env, true>) => ({

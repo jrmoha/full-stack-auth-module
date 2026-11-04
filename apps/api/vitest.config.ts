@@ -25,7 +25,8 @@ export default defineConfig({
       JWT_TTL_SECONDS: '3600',
       COOKIE_SECURE: 'false',
       TRUST_PROXY_HOPS: '1',
-      THROTTLE_AUTH_LIMIT: '10',
+      // High, so suites that sign up many users from 127.0.0.1 are not throttled; throttle.spec.ts sets 3.
+      THROTTLE_AUTH_LIMIT: '100000',
       THROTTLE_AUTH_TTL_SECONDS: '60',
       LOG_LEVEL: 'info',
     },

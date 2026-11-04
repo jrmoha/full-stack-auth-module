@@ -264,7 +264,7 @@ No `NEXT_PUBLIC_` variables exist. The browser only uses relative `/api` paths. 
 - CI provides `mongo:8` as a service container with database `auth_test`.
 
 ## 10. Security
-- **Rate limiting:** signup and signin, 10 requests per 60 s per client IP, in-memory store. Client IP comes from the forwarded-for header with exactly `TRUST_PROXY_HOPS` (1) trusted. `/auth/me` and logout are not limited, because Next.js calls `/auth/me` server-to-server on every protected render.
+- **Rate limiting:** signup and signin, 10 requests per 60 s per client IP and per route (each has its own budget), in-memory store; IPv6 clients are grouped by /64. Client IP comes from the forwarded-for header with exactly `TRUST_PROXY_HOPS` (1) trusted. `/auth/me` and logout are not limited, because Next.js calls `/auth/me` server-to-server on every protected render.
 - **Helmet:** defaults on the API. JSON endpoints keep the default CSP. Swagger UI routes get a relaxed CSP scoped to `/docs`, which exists only outside production.
 - **Web headers:** `X-Frame-Options: DENY`, `X-Content-Type-Options: nosniff`, `Referrer-Policy: strict-origin-when-cross-origin`, set in Next.js config. A nonce-based CSP for the web app is deferred.
 - **CORS:** origin exactly `WEB_ORIGIN`, credentials allowed, methods GET and POST. Normal traffic is same-origin through the rewrite; CORS matters only for direct API calls.
