@@ -233,3 +233,13 @@ Copy this block for each task, in roadmap order.
 - Corrected or reworked (from review): a cookie that is not header-safe after URL-decoding made the outgoing header invalid, was reported as "API unreachable", and kept the user on the error page with retry useless; tokens not shaped like a JWT now count as signed out. A 400 with no field errors and no message gave the user no feedback; it now falls back to the generic alert. The fetch had no timeout (now 5 s); unread bodies are cancelled; a 200 without a user now throws; `PublicUser` moved out of the browser client into a types module; the 429 text now always reads "N seconds" as in §8.
 - Note: `getSession()` makes no API call without a cookie, so with the API stopped only users holding a cookie see the error page; anonymous users still reach `/signin`. The roadmap's "with the API stopped `/` renders the error page" holds for signed-in users.
 - Differed from AI suggestion: none.
+
+
+### 2.3 `/app` page and logout button
+- Date / time spent: 2026-11-04, about 20 min (estimate 15)
+- AI-generated: `apps/web/src/app/app/page.tsx` (session check with a redirect to `/signin`, the design's welcome heading and profile card from the real user; preview banner and sample data removed) and `components/logout-button.tsx` (client leaf: posts to `/api/auth/logout`, replaces history with `/signin`, disabled with a pending label, an error message if logout fails).
+- `'use client'` on the page: no. The page stayed a Server Component from the 2.0b preview; only the logout button is a client component.
+- Prompt or approach: the page and button were written while 2.2 was in review and committed after it. A 2.2 review note was applied here: logout originally swallowed failures and navigated anyway, but a failed logout leaves the httpOnly cookie set, so `/signin` would bounce the user back to `/app`; on failure the button now stays and shows "Couldn't log out. Try again."
+- Verified by: Chrome DevTools MCP against a production build with its own API: anonymous `/app` redirects to `/signin` (307) and the response is `private, no-store`; after an in-page signup, `/app` shows "Welcome to the application." and the user's name, email, id and member-since date; the logout button is reached with Tab and shows a focus ring; during a slowed request it is disabled with "Logging out…"; logout lands on `/signin` and reloading `/app` redirects there; with the API stopped, logout stays on `/app` with the error message and the button re-enabled; no console messages on the happy path. `pnpm lint`, `pnpm typecheck`, web build. No reviewer (L).
+- Corrected or reworked: the logout-failure handling above.
+- Differed from AI suggestion: none.

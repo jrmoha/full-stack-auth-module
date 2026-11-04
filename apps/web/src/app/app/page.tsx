@@ -1,17 +1,10 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import { BrandMark } from '@/components/brand-mark';
 import { LogoutButton } from '@/components/logout-button';
-import { PreviewBanner } from '@/components/preview-banner';
+import { getSession } from '@/lib/session';
 
 export const metadata: Metadata = { title: 'Workspace' };
-
-/** Sample data for the visual preview. Task 2.3 replaces it with the user from GET /auth/me (architecture §4). */
-const previewUser = {
-  id: '6650f1c2a9e4b7d1c3a2f001',
-  name: 'Dana Levi',
-  email: 'dana@company.com',
-  createdAt: '2026-11-04T09:30:00.000Z',
-};
 
 function initials(name: string): string {
   return name
@@ -22,9 +15,13 @@ function initials(name: string): string {
     .join('');
 }
 
-// Server Component (design screen 02). Task 2.3 adds the session check and redirect (architecture §5, §6).
-export default function AppPage() {
-  const user = previewUser;
+// Server Component (design screen 02). Dynamic: the session check runs on every request and is never cached
+// (architecture §5, §6). Anonymous users go to /signin.
+export default async function AppPage() {
+  const user = await getSession();
+  if (!user) {
+    redirect('/signin');
+  }
   const memberSince = new Date(user.createdAt).toLocaleDateString('en-US', {
     month: 'short',
     day: 'numeric',
@@ -40,7 +37,6 @@ export default function AppPage() {
 
   return (
     <div className="flex min-h-screen flex-col bg-canvas">
-      <PreviewBanner />
       <header className="flex items-center justify-between gap-3 border-b border-line-soft bg-surface px-7 py-3.5">
         <BrandMark size="sm" />
         <LogoutButton />
