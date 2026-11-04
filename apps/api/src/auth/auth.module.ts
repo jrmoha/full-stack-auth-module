@@ -1,19 +1,20 @@
 import { Module } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtModule } from '@nestjs/jwt';
+import { PassportModule } from '@nestjs/passport';
 import type { Env } from '../config/index.js';
 import { UsersModule } from '../users/users.module.js';
 import { AuthController } from './auth.controller.js';
 import { AuthService } from './auth.service.js';
+import { JwtAuthGuard } from './jwt-auth.guard.js';
+import { JWT_ALGORITHM, JWT_CLOCK_TOLERANCE_SECONDS } from './jwt.constants.js';
+import { JwtStrategy } from './jwt.strategy.js';
 import { PasswordHasher } from './password-hasher.js';
-
-/** HS256 pinned for signing and verifying, 30 s clock tolerance (architecture §10). */
-export const JWT_ALGORITHM = 'HS256';
-export const JWT_CLOCK_TOLERANCE_SECONDS = 30;
 
 @Module({
   imports: [
     UsersModule,
+    PassportModule,
     JwtModule.registerAsync({
       inject: [ConfigService],
       useFactory: (config: ConfigService<Env, true>) => ({
@@ -30,6 +31,6 @@ export const JWT_CLOCK_TOLERANCE_SECONDS = 30;
     }),
   ],
   controllers: [AuthController],
-  providers: [AuthService, PasswordHasher],
+  providers: [AuthService, PasswordHasher, JwtStrategy, JwtAuthGuard],
 })
 export class AuthModule {}

@@ -23,3 +23,6 @@ export interface ErrorBody {
   requestId: string;
   fieldErrors?: FieldErrors;
 }
+
+/** Shown for every UNAUTHENTICATED response (guard and filter alike). */
+export const UNAUTHENTICATED_MESSAGE = 'Sign in to continue.';

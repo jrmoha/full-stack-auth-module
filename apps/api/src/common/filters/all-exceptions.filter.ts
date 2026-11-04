@@ -9,13 +9,13 @@ import {
 import { ThrottlerException } from '@nestjs/throttler';
 import type { Request, Response } from 'express';
 import { AppException } from '../errors/app.exception.js';
-import type { ErrorBody, ErrorCode } from '../errors/error-codes.js';
+import { type ErrorBody, type ErrorCode, UNAUTHENTICATED_MESSAGE } from '../errors/error-codes.js';
 
 const GENERIC_MESSAGE = 'Something went wrong. Try again.';
 
 const MESSAGES = {
   NOT_FOUND: 'Not found.',
-  UNAUTHENTICATED: 'Sign in to continue.',
+  UNAUTHENTICATED: UNAUTHENTICATED_MESSAGE,
   VALIDATION_FAILED: 'The request body could not be read.',
   RATE_LIMITED: 'Too many attempts. Try again later.',
   SERVICE_UNAVAILABLE: 'The service is temporarily unavailable. Try again.',
