@@ -399,3 +399,12 @@ Copy this block for each task, in roadmap order.
 - What the draft summary overclaimed: nothing found on re-reading it against the entries. The point most at risk was the time figure: it is given with and without the avoidable 56-minute reinstall (0.5), not only the flattering one, and section 4 names the three places the owner's decision differed (2.0b, the Mongo port, 4.3) rather than saying every recommendation was accepted. An earlier version of this entry claimed the draft had overclaimed on those points; that was not true and was corrected before pushing.
 - Verified by: the row-versus-entry cross-check; every summary bullet cites task IDs that exist below. No reviewer (L).
 - Differed from AI suggestion: none.
+
+
+### 4.3 Clean-clone check and release
+- Date / time spent: 2026-11-04, about 15 min (estimate 10)
+- What was done: a fresh clone into an empty temporary directory, then the README exactly as written. `pnpm install` (frozen lockfile, argon2's build allowed), both env files copied from their examples with a newly generated `JWT_SECRET`, `docker compose up -d --wait mongo`, `pnpm test` (API 299, web 114), `pnpm --filter web exec playwright install chromium`, `pnpm e2e` (7/7), and `pnpm dev`: `/` redirected to `/signin`, `/signin` 200, `/auth/me` 401, `/docs` 200, and a signup through the web origin 201. History scan over all refs: no `.env` file other than the examples ever committed; neither the owner's dev `JWT_SECRET` nor the clone's appears anywhere in history; no token-like strings or private keys; the only URI with credentials is the fake `zq9user:zq9pass` sentinel in the 1.1 scrubbing test. Pushed to the private repo with CI green.
+- Anything the clean clone exposed: nothing in the README or the code needed a fix. Worth knowing: the compose file pins its project name, so a clone on a machine that already has this project's container reuses that container and its data volume.
+- Not done, by the owner's choice at the gate: making the repository public. Row 4.3 stays "in progress" until the owner runs `gh repo edit jrmoha/full-stack-auth-module --visibility public --accept-visibility-change-consequences` (or uses the GitHub settings page) and shares the link.
+- Verified by: the commands above. No reviewer (L).
+- Differed from AI suggestion: the AI offered to make the repo public automatically once every check passed; the owner kept that step.
