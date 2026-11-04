@@ -14,9 +14,7 @@ concurrency:
 jobs:
   verify:
     name: Lint, typecheck, build, unit and integration tests
-    # Not ubuntu-latest (26.04): mongo:8 refuses to start on Linux kernels 6.19+ and service containers share
-    # the runner's kernel (https://jira.mongodb.org/browse/SERVER-121912). Revisit when a fixed mongo:8 ships.
-    runs-on: ubuntu-24.04
+    runs-on: ubuntu-latest
     timeout-minutes: 15
 
     services:
@@ -24,6 +22,11 @@ jobs:
         image: mongo:8
         ports:
           - 27017:27017
+        # MongoDB 8 crashes on Linux kernels 6.19 to 7.0.13 when TCMalloc per-CPU caches use rseq, and refuses to
+        # start there (https://jira.mongodb.org/browse/SERVER-121912). The image sets rseq=0 so TCMalloc can take
+        # rseq; rseq=1 leaves it with glibc, turning per-CPU caches off (slower allocator, fine for CI).
+        env:
+          GLIBC_TUNABLES: glibc.pthread.rseq=1
         # The job waits until mongosh answers ping (architecture §7: CI uses a mongo:8 service container).
         options: >-
           --health-cmd "mongosh --quiet --eval 'db.adminCommand({ ping: 1 }).ok'"
