@@ -12,10 +12,76 @@ written per task, in the task's commit, never reconstructed afterwards.
 Written in task 4.2 from the entries below. Each point cites task IDs.
 
 ### 1. Which parts were AI-assisted
+Nearly all of the code, tests, configuration and docs were AI-generated under owner review; the owner set scope, approved
+every plan and env gate, and made the product calls.
+- Spec and workflow: the architecture, ADRs and roadmap (S); the agent definitions and MCP config, which arrived late (0.1).
+- Backend: app setup, logging and errors (1.1), users (1.2), the shared validation fixtures and DTOs (1.3), all four
+  endpoints and rate limiting (1.4 to 1.8), Swagger (3.1).
+- Frontend: the design import and theme (2.0, 2.0b), Zod parity schemas (2.1), the session helper and app shell (2.2),
+  and the three screens (2.3 to 2.5).
+- Tooling and delivery: scaffold (0.2), Mongo and env validation (0.3, 0.4), test harness (0.5), CI (0.6), e2e (3.2),
+  README (4.1).
+
 ### 2. Prompts and approaches that worked well
+- **Plan, then gate.** Each task started from its roadmap spec with a written plan and an explicit owner approval;
+  env changes were listed before they were applied (0.3, 0.4, 0.6).
+- **Research the installed version, not memory.** Reading the installed package or its source caught real version
+  changes: Vitest 5 config lookup and global setup (0.5), Express 5 body-parser errors and pino's default serializers
+  logging every header (1.1), passport-jwt's option merging (1.6), the throttler's `Retry-After-<name>` (1.8), the
+  Next.js rewrite adding no `X-Forwarded-For` (0.4), MongoDB 8's kernel check (0.6).
+- **An independent reviewer on every non-trivial task.** Almost every FLAG was a real defect (see 3 below).
+- **Sentinel values in tests.** Unique strings sent as secrets, cookies or URIs proved names-only errors and redacted
+  logs (0.3, 1.1, 1.4, 0.4).
+- **One shared fixture file for both validators.** It caught a web/API disagreement no one had written a rule for
+  (1.3, 2.1).
+- **Verify in a real browser and against production builds** before ticking a frontend task (2.2 to 2.5, 3.1, 3.2).
+
 ### 3. What had to be corrected or reworked
+- **Security and privacy defects found by review or tests:**
+  - errors before routing had no request id (1.1);
+  - the error log could carry secrets, and a scrubber of the AI's own was too loose (1.1);
+  - the index-build error printed an email at boot (1.2);
+  - unknown-email signins could return 500 and reveal accounts (1.5);
+  - a database outage during the session check looked like a sign-out (1.6);
+  - the IPv6 rate-limit key could be rotated (1.8);
+  - a bad `API_URL` was printed in the build output (0.4);
+  - a non-ASCII cookie trapped users on the error page (2.2);
+  - CORS echoed the allowed origin to every caller (1.1).
+- **Correctness:**
+  - validation messages came out in reverse order (1.3);
+  - blank numeric env values became 0 (0.3);
+  - Zod counted emoji differently from the API (2.1);
+  - a corrected field kept its error (2.4);
+  - double submit was possible during navigation (2.4);
+  - a failed logout bounced users back to `/app` (2.3);
+  - Swagger documented a 503 that logout cannot return (3.1).
+- **Tooling and process:**
+  - CLI defaults contradicted the spec: Cache Components on, the wrong Tailwind plugin, and a `.gitignore` that would have hidden `.env.example` (0.2);
+  - the test DB cleanup missed unregistered collections (0.5);
+  - `pnpm lint` broke after e2e builds (3.2);
+  - a forced reinstall cost 56 minutes (0.5);
+  - one task commit went out without its entry (3.2);
+  - row 0.1 was ticked without its files (0.1 completed).
+
 ### 4. Where decisions differed from the AI's suggestion
+- **Visual preview before the API (2.0b).** The AI recommended building the screens inside 2.2 to 2.5 against the real
+  API; the owner asked to see them first, accepting some rework.
+- **Mongo port (0.3, then the follow-up).** The AI first recommended stopping the other project's container on 27017;
+  after the conflict recurred, the owner asked for a lasting fix and the port moved to 27018.
+- **Repository visibility (4.3).** The owner kept the final step of making the repo public for themselves.
+- **Everything else followed the AI's recommendations** after the owner reviewed them: deferring the Arabic toggle
+  and toast (2.0), the CSP and docs decisions (3.1), and the tool stand-ins while the agents were missing (0.2 to 3.2).
+
 ### Time: estimated vs actual
+- **Estimated tasks:** 21 tasks with an estimate came to 543 min actual against 455 min estimated (+19%).
+  - About 56 min of the overrun was one avoidable forced reinstall on a slow registry (0.5).
+  - Without it, actual was 487 min (+7%).
+- **Unplanned or unestimated work:** about 75 min more. That covers the spec review (S), the design reference and
+  preview (2.0, 2.0b), completing 0.1, and the open-items follow-up.
+- **Biggest overruns:** 1.1 (+15), 2.4 (+15), 3.1 (+15), 1.3 (+10), 0.4 (+10), 0.6 (+10). Each was driven by review
+  fixes or a platform surprise rather than the first draft.
+- **Under estimate:** 0.2 (-22), 1.4 (-10), 1.6 (-5).
+- **Not included:** 4.2 and 4.3, whose times are in their own entries.
 
 ## Per-task entries
 
@@ -323,4 +389,13 @@ Copy this block for each task, in roadmap order.
 - AI-generated: `README.md`: prerequisites (Node 24, pnpm 10.33 via corepack, Docker), setup (clone, install, both env files, generating `JWT_SECRET`), `pnpm dev` with the three URLs, tests (`pnpm test` with Mongo up, Playwright install, `pnpm e2e`), the scripts table, the four endpoints in brief, the layout, and links to the architecture, ADRs, roadmap, AI.md and future improvements (detail linked, not copied).
 - What the draft overstated or got wrong: nothing found at commit time. Every command had already been run in this session, and every relative link and section anchor was checked; 4.3 re-runs the commands from a fresh clone and fixes anything they expose here.
 - Verified by: link and anchor check, `prettier --check`. No reviewer (L).
+- Differed from AI suggestion: none.
+
+
+### 4.2 AI.md summary and future improvements
+- Date / time spent: 2026-11-04, about 15 min (estimate 15)
+- AI-generated: the four summary sections and the time comparison at the top of this file, and the final additions to `docs/future-improvements.md` (limitations found while building: the edge-proxy dependency for client IP, the proxy's plain-text 500, the CI MongoDB kernel workaround, Swagger repeating the §4 limits, the fixed "N seconds" wording; two new revisit rows).
+- How the summary was assembled: from the per-task entries only, which were not rewritten. Roadmap rows were cross-checked against entry headings (every row has an entry; 4.3 follows), and the time totals were computed from each entry's "about N min (estimate M)" line rather than recalled.
+- What the draft summary overclaimed: nothing found on re-reading it against the entries. The point most at risk was the time figure: it is given with and without the avoidable 56-minute reinstall (0.5), not only the flattering one, and section 4 names the three places the owner's decision differed (2.0b, the Mongo port, 4.3) rather than saying every recommendation was accepted. An earlier version of this entry claimed the draft had overclaimed on those points; that was not true and was corrected before pushing.
+- Verified by: the row-versus-entry cross-check; every summary bullet cites task IDs that exist below. No reviewer (L).
 - Differed from AI suggestion: none.

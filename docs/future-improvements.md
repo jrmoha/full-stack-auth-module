@@ -10,6 +10,11 @@
 - The web app sends basic security headers but no nonce-based Content Security Policy.
 - Not deployed: no Dockerfiles, no hosting configuration; production behavior is a documented stance only.
 - E2E runs in Chromium only.
+- Per-client rate limiting relies on an edge proxy that appends `X-Forwarded-For`; the Next.js rewrite adds none (0.4).
+- When the API is down, `/api/*` returns the proxy's plain-text 500 rather than the §4 error shape; the web shows the generic error.
+- CI runs `mongo:8` with TCMalloc per-CPU caches off (`GLIBC_TUNABLES=glibc.pthread.rseq=1`) because MongoDB 8 refuses to start on the runners' Linux 6.19+ kernels (SERVER-121912); the same would apply to a local Docker host on such a kernel.
+- The §4 length limits also appear in the Swagger `@ApiProperty` decorators (3.1), a fifth place to update on a validation change.
+- The 429 message reads "Try again in 1 seconds" for a one-second wait, because §8 fixes the text as "N seconds".
 
 ## Deferred decisions (when to revisit)
 | Decision | Revisit when |
@@ -25,6 +30,8 @@
 | Exported OpenAPI spec as a CI artifact | An external consumer needs API docs in production |
 | Per-worker test databases | Test suite time becomes a bottleneck |
 | Unicode-aware email normalization | Internationalized email addresses must be supported |
+| Drop the CI `GLIBC_TUNABLES` override | A `mongo:8` release supports Linux 6.19+ with per-CPU caches (SERVER-121912) |
+| Share the §4 length constants with the Swagger decorators | The next validation change, or a third consumer of the limits |
 | Arabic/RTL language toggle (designed in `docs/design/`) | A second language is required; needs localised §4 and §8 messages on both web and API |
 | Post-sign-in confirmation toast (designed in `docs/design/`) | Product wants sign-in feedback beyond landing on `/app`; needs a one-shot flag across the server redirect |
 
