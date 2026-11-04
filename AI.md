@@ -124,3 +124,17 @@ Copy this block for each task, in roadmap order.
   - The AI's first scrub test failed for two reasons it introduced: the filter logged the raw error message as the log line's `msg`, outside the scrubbed field (now a fixed message), and its email pattern was loose enough to mangle pnpm store paths in stack traces (now strict email syntax).
   - The AI started 1.2 and 1.3 files while 1.1 was in review and briefly wired `UsersModule` into `app.module.ts`; it backed that out and stashed the work so the 1.1 commit was verified on its own. A first attempt to isolate the files with `mv` hit a name clash and was redone with `git stash`; no files were lost.
 - Differed from AI suggestion: none.
+
+
+### 1.2 Users module
+- Date / time spent: 2026-11-04, about 15 min (estimate 15)
+- AI-generated: `apps/api/src/users/` (`User` schema with a unique email index, `select: false` hash, timestamps, no version key; `UsersService` with `create`, `findByEmailWithHash`, `findById`, `toPublicUser`; typed `DuplicateEmailError`; `UsersModule` awaiting `model.init()` at boot); `test/users/users.service.spec.ts` (8 tests); `UsersModule` registered in `AppModule`.
+- Pre-check or index, and the init await: the AI relied on the unique index and Mongo error 11000 from the start, with no pre-check query, and awaited `model.init()` in `onModuleInit` so the API cannot serve before the index exists. No fix was needed there.
+- Prompt or approach: the plan from the M1 planning session; written while 1.1 was in review, then wired into `AppModule` only after 1.1 was committed.
+- Verified by: `pnpm test` (36 tests with 1.2 alone), `pnpm lint`, `pnpm typecheck`, `pnpm build`. Reviewer: `code-reviewer`, verdict FLAG; it also simulated an index-build failure and confirmed `init()` rejects rather than hanging.
+- Corrected or reworked (all from review):
+  - On duplicate data the index-build error names the duplicate email, and `main.ts` prints boot errors; boot now rethrows a generic message. A deterministic test makes `init()` fail and asserts the generic message without the email.
+  - Boot relied on Mongoose's default `autoIndex: true`; `autoIndex` and `autoCreate` are now pinned on the schema.
+  - The "index exists" test cannot fail on its own, because the test database (and so the index) persists between runs; the new boot-failure test covers the behaviour instead.
+  - Noted for 1.4: `create()` returns a document that still holds the hash in memory (`select: false` only affects queries), so auth code must only ever return `toPublicUser(...)`.
+- Differed from AI suggestion: none.

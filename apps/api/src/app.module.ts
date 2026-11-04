@@ -5,6 +5,7 @@ import { MongooseModule } from '@nestjs/mongoose';
 import { MongooseError } from 'mongoose';
 import { LoggingModule } from './common/logging/logger.module.js';
 import { type Env, validateEnv } from './config/index.js';
+import { UsersModule } from './users/users.module.js';
 
 /** Fail fast when Mongo is unreachable (architecture §8): one 5 s attempt, no retries. */
 const MONGO_SERVER_SELECTION_TIMEOUT_MS = 5000;
@@ -29,6 +30,7 @@ const MONGO_SERVER_SELECTION_TIMEOUT_MS = 5000;
         connectionErrorFactory: (error) => new MongooseError(`${error.name}: ${error.message}`),
       }),
     }),
+    UsersModule,
   ],
 })
 export class AppModule {}
